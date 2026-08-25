@@ -38,7 +38,13 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+figma_designs/
+DEVELOPER_GUIDE.md
+task.pdf
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Local document parsing output
+.firecrawl/

@@ -1,0 +1,46 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
+  <div class="sidebar__header">
+    <a class="sidebar__brand" routerLink="/dashboard" aria-label="Buzzer Admin Console">
+      <span class="sidebar__brand-mark" aria-hidden="true">ϟ</span>
+      @if (!collapsed()) {
+        <span class="sidebar__brand-copy">
+          <strong>Buzzer</strong>
+          <small>Admin Console</small>
+        </span>
+      }
+    </a>
+
+    <button class="sidebar__collapse" type="button" (click)="toggle()" [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <span aria-hidden="true">{{ collapsed() ? '›' : '‹' }}</span>
+    </button>
+  </div>
+
+  <nav class="sidebar__nav">
+    @for (section of sections; track section.label) {
+      <section class="sidebar__section">
+        @if (!collapsed()) {
+          <p class="sidebar__section-label">{{ section.label }}</p>
+        }
+
+        @for (item of section.items; track item.route) {
+          <a [routerLink]="item.route" routerLinkActive="active" (click)="onNavigate()" [attr.aria-label]="item.label" [title]="collapsed() ? item.label : null">
+            <span class="sidebar__item-icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+            @if (!collapsed()) {
+              <span class="sidebar__item-label">{{ item.label }}</span>
+            }
+          </a>
+        }
+      </section>
+    }
+  </nav>
+
+  <div class="sidebar__account">
+    <span class="sidebar__avatar">A</span>
+    @if (!collapsed()) {
+      <span class="sidebar__account-copy">
+        <span>Admin user</span>
+        <small>admin@buzzer.dev</small>
+      </span>
+    }
+  </div>
+</aside>
