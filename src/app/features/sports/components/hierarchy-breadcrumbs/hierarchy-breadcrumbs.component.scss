@@ -1,0 +1,15 @@
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 24px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+
+  a { color: var(--text-secondary); text-decoration: none; }
+  a:hover { color: var(--yellow); }
+  > span:not(.breadcrumbs__separator) { color: var(--white); }
+  &__separator { color: var(--text-muted); opacity: .6; }
+}

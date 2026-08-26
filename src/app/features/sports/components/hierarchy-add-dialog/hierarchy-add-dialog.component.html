@@ -1,0 +1,35 @@
+@if (isOpen()) {
+  <div class="dialog-layer">
+    <button class="dialog-backdrop" type="button" (click)="close()" aria-label="Close dialog"></button>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-dialog-title">
+      <header class="dialog__header">
+        <div>
+          <p>Add {{ entityLabel() }}</p>
+          <h2 id="add-dialog-title">{{ title() }}</h2>
+        </div>
+        <button type="button" class="dialog__close" (click)="close()" aria-label="Close dialog">×</button>
+      </header>
+
+      <form [formGroup]="form()" (ngSubmit)="submit()" novalidate>
+        @for (field of fields(); track field.controlName) {
+          <label [attr.for]="field.controlName">
+            {{ field.label }}
+            @if (field.type === 'select') {
+              <select [id]="field.controlName" [formControlName]="field.controlName">
+                <option value="" disabled>Select {{ field.label.toLowerCase() }}</option>
+                @for (option of field.options ?? []; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+              </select>
+            } @else {
+              <input [id]="field.controlName" [type]="field.type ?? 'text'" [formControlName]="field.controlName" [placeholder]="field.placeholder ?? ''" />
+            }
+          </label>
+        }
+        @if (errorMessage()) { <p class="dialog__error" role="alert">{{ errorMessage() }}</p> }
+        <footer class="dialog__actions">
+          <button type="button" class="dialog__cancel" (click)="close()">Cancel</button>
+          <button type="submit" class="dialog__submit" [disabled]="isSaving()">{{ isSaving() ? 'Saving…' : 'Add ' + entityLabel() }}</button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}

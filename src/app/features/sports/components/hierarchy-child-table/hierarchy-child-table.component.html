@@ -1,0 +1,41 @@
+<section class="child-table" [attr.aria-label]="title()">
+  <header class="child-table__header">
+    <div>
+      <h3>{{ title() }}</h3>
+      <p>{{ total() }} total</p>
+    </div>
+  </header>
+
+  <div class="child-table__scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>{{ title().slice(0, -1) }}</th>
+          @for (column of columns(); track column.key) { <th>{{ column.label }}</th> }
+          <th><span class="visually-hidden">Open details</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoading()) {
+          @for (item of [1, 2, 3]; track item) { <tr class="child-table__loading-row"><td [attr.colspan]="columns().length + 2"><span></span></td></tr> }
+        } @else {
+          @for (row of rows(); track row.id) {
+            <tr>
+              <td>
+                @if (row.route) {
+                  <a class="child-table__name" [routerLink]="row.route"><strong>{{ row.title }}</strong>@if (row.subtitle) { <small>{{ row.subtitle }}</small> }</a>
+                } @else {
+                  <span class="child-table__name"><strong>{{ row.title }}</strong>@if (row.subtitle) { <small>{{ row.subtitle }}</small> }</span>
+                }
+              </td>
+              @for (column of columns(); track column.key) { <td>{{ row.values[column.key] ?? '—' }}</td> }
+              <td class="child-table__action">@if (row.route) { <a [routerLink]="row.route" [attr.aria-label]="'Open ' + row.title">View</a> }</td>
+            </tr>
+          } @empty {
+            <tr><td class="child-table__empty" [attr.colspan]="columns().length + 2">{{ emptyMessage() }}</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

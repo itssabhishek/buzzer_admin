@@ -35,6 +35,36 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/participants/:participantId',
+        data: { pageTitle: 'Participant Details' },
+        loadComponent: () =>
+          import('./features/sports/pages/participant-detail/participant-detail.component').then(
+            (c) => c.ParticipantDetailComponent,
+          ),
+      },
+      {
+        path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId',
+        data: { pageTitle: 'Organisation Details' },
+        loadComponent: () =>
+          import('./features/sports/pages/organisation-detail/organisation-detail.component').then(
+            (c) => c.OrganisationDetailComponent,
+          ),
+      },
+      {
+        path: 'sports/:sportId/governing-bodies/:governingBodyId',
+        data: { pageTitle: 'Governing Body Details' },
+        loadComponent: () =>
+          import('./features/sports/pages/governing-body-detail/governing-body-detail.component').then(
+            (c) => c.GoverningBodyDetailComponent,
+          ),
+      },
+      {
+        path: 'sports/:sportId',
+        data: { pageTitle: 'Sport Details' },
+        loadComponent: () =>
+          import('./features/sports/pages/sport-detail/sport-detail.component').then((c) => c.SportDetailComponent),
+      },
+      {
         path: 'match-management',
         data: { pageTitle: 'Match Management' },
         loadComponent: () =>

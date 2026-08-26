@@ -6,9 +6,17 @@ import { API_BASE_URL } from '../../../core/config/api-base-url.token';
 import {
   ApiResponse,
   CatalogueStat,
+  GoverningBody,
+  GoverningBodyPayload,
+  Organisation,
+  OrganisationPayload,
   PaginatedResponse,
+  Participant,
+  ParticipantPayload,
   Sport,
   SportPayload,
+  Team,
+  TeamPayload,
 } from '../models/sport.model';
 
 @Injectable({ providedIn: 'root' })
@@ -55,11 +63,88 @@ export class SportsService {
     return this.http.delete<ApiResponse<void>>(`${this.sportsUrl}/${id}`).pipe(map(() => undefined));
   }
 
+  getSport(id: string): Observable<Sport> {
+    return this.getById<Sport>('sports', id);
+  }
+
+  getGoverningBody(id: string): Observable<GoverningBody> {
+    return this.getById<GoverningBody>('governing-bodies', id);
+  }
+
+  getOrganisation(id: string): Observable<Organisation> {
+    return this.getById<Organisation>('organizations', id);
+  }
+
+  getTeam(id: string): Observable<Team> {
+    return this.getById<Team>('teams', id);
+  }
+
+  getParticipant(id: string): Observable<Participant> {
+    return this.getById<Participant>('players', id);
+  }
+
+  listGoverningBodies(sportId: string): Observable<GoverningBody[]> {
+    return this.listChildren<GoverningBody>('governing-bodies', 'name', 'sportId', sportId);
+  }
+
+  listOrganisations(governingBodyId: string): Observable<Organisation[]> {
+    return this.listChildren<Organisation>('organizations', 'name', 'governingBodyId', governingBodyId);
+  }
+
+  listTeams(organizationId: string): Observable<Team[]> {
+    return this.listChildren<Team>('teams', 'name', 'organizationId', organizationId);
+  }
+
+  listParticipants(teamId: string): Observable<Participant[]> {
+    return this.listChildren<Participant>('players', 'lastName', 'teamId', teamId);
+  }
+
+  createGoverningBody(payload: GoverningBodyPayload): Observable<GoverningBody> {
+    return this.createChild<GoverningBody, GoverningBodyPayload>('governing-bodies', payload);
+  }
+
+  createOrganisation(payload: OrganisationPayload): Observable<Organisation> {
+    return this.createChild<Organisation, OrganisationPayload>('organizations', payload);
+  }
+
+  createParticipant(payload: ParticipantPayload): Observable<Participant> {
+    return this.createChild<Participant, ParticipantPayload>('players', payload);
+  }
+
+  createTeam(payload: TeamPayload): Observable<Team> {
+    return this.createChild<Team, TeamPayload>('teams', payload);
+  }
+
   private getTotal(path: string): Observable<number> {
     const params = new HttpParams().set('page', 1).set('limit', 1);
 
     return this.http
       .get<PaginatedResponse<unknown>>(`${this.apiBaseUrl}${path}`, { params })
       .pipe(map((response) => response.meta.total));
+  }
+
+  private getById<T>(resource: string, id: string): Observable<T> {
+    return this.http
+      .get<ApiResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}/${id}`)
+      .pipe(map((response) => response.data));
+  }
+
+  private listChildren<T>(resource: string, sortBy: string, parentKey: string, parentId: string): Observable<T[]> {
+    const params = new HttpParams()
+      .set('page', 1)
+      .set('limit', 100)
+      .set('sortBy', sortBy)
+      .set('sortOrder', 'asc')
+      .set(parentKey, parentId);
+
+    return this.http
+      .get<PaginatedResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}`, { params })
+      .pipe(map((response) => response.data));
+  }
+
+  private createChild<T, TPayload>(resource: string, payload: TPayload): Observable<T> {
+    return this.http
+      .post<ApiResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}`, payload)
+      .pipe(map((response) => response.data));
   }
 }

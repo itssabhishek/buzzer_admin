@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, finalize, Subject } from 'rxjs';
 
 import { CatalogueStat, PaginationMeta, Sport, SportPayload } from '../../models/sport.model';
@@ -14,7 +15,7 @@ const EMPTY_META: PaginationMeta = { page: 1, limit: PAGE_SIZE, total: 0, totalP
 @Component({
   selector: 'app-sports-catalogue',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule],
+  imports: [DecimalPipe, ReactiveFormsModule, RouterLink],
   templateUrl: './sports-catalogue.component.html',
   styleUrl: './sports-catalogue.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -69,7 +69,7 @@
                       <span class="sport-name__fallback">{{ sport.name.slice(0, 1) }}</span>
                     }
                     <span>
-                      <strong>{{ sport.name }}</strong>
+                      <a [routerLink]="['/sports', sport.id]">{{ sport.name }}</a>
                       @if (sport.description) { <small>{{ sport.description }}</small> }
                     </span>
                   </div>

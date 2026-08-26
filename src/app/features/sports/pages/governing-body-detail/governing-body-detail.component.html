@@ -1,0 +1,28 @@
+<app-hierarchy-detail
+  [breadcrumbs]="breadcrumbs()"
+  eyebrow="Governing body"
+  [title]="governingBody()?.name ?? 'Loading governing body…'"
+  [description]="governingBody()?.country ? 'Based in ' + governingBody()?.country : null"
+  [stats]="stats()"
+  childTableTitle="Organisations"
+  [childTableTotal]="organisations().length"
+  [childTableColumns]="childColumns"
+  [childTableRows]="childRows()"
+  [isLoading]="isLoading()"
+  [errorMessage]="errorMessage()"
+  emptyMessage="This governing body does not have any organisations yet."
+  addLabel="Organisation"
+  (addRequested)="openAddDialog()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addDialogOpen()"
+  title="Add Organisation"
+  entityLabel="Organisation"
+  [form]="organisationForm"
+  [fields]="addFields"
+  [isSaving]="isAdding()"
+  [errorMessage]="addErrorMessage()"
+  (closed)="closeAddDialog()"
+  (submitted)="addOrganisation()"
+/>

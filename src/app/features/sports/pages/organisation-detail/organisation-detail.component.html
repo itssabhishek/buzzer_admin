@@ -1,0 +1,42 @@
+<app-hierarchy-detail
+  [breadcrumbs]="breadcrumbs()"
+  eyebrow="Organisation"
+  [title]="organisation()?.name ?? 'Loading organisation…'"
+  [description]="organisation()?.city ? 'Based in ' + organisation()?.city : null"
+  [stats]="stats()"
+  childTableTitle="Participants"
+  [childTableTotal]="participants().length"
+  [childTableColumns]="childColumns"
+  [childTableRows]="childRows()"
+  [isLoading]="isLoading()"
+  [errorMessage]="errorMessage()"
+  emptyMessage="This organisation does not have any participants yet."
+  addLabel="Team"
+  secondaryAddLabel="Participant"
+  (addRequested)="openAddTeamDialog()"
+  (secondaryAddRequested)="openAddDialog()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addTeamDialogOpen()"
+  title="Add Team"
+  entityLabel="Team"
+  [form]="teamForm"
+  [fields]="teamAddFields"
+  [isSaving]="isAddingTeam()"
+  [errorMessage]="addTeamErrorMessage()"
+  (closed)="closeAddTeamDialog()"
+  (submitted)="addTeam()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addDialogOpen()"
+  title="Add Participant"
+  entityLabel="Participant"
+  [form]="participantForm"
+  [fields]="addFields()"
+  [isSaving]="isAdding()"
+  [errorMessage]="addErrorMessage()"
+  (closed)="closeAddDialog()"
+  (submitted)="addParticipant()"
+/>

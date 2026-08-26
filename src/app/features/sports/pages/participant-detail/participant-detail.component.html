@@ -1,0 +1,28 @@
+<app-hierarchy-detail
+  [breadcrumbs]="breadcrumbs()"
+  eyebrow="Participant"
+  [title]="title()"
+  [description]="team() ? 'Part of ' + team()?.name : null"
+  [stats]="stats()"
+  childTableTitle="Team Members"
+  [childTableTotal]="teammates().length"
+  [childTableColumns]="childColumns"
+  [childTableRows]="childRows()"
+  [isLoading]="isLoading()"
+  [errorMessage]="errorMessage()"
+  emptyMessage="This participant does not have any teammates yet."
+  addLabel="Participant"
+  (addRequested)="openAddDialog()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addDialogOpen()"
+  title="Add Participant"
+  entityLabel="Participant"
+  [form]="participantForm"
+  [fields]="addFields"
+  [isSaving]="isAdding()"
+  [errorMessage]="addErrorMessage()"
+  (closed)="closeAddDialog()"
+  (submitted)="addParticipant()"
+/>

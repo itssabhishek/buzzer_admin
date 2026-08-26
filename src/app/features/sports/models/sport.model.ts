@@ -40,3 +40,71 @@ export interface CatalogueStat {
   value: number;
   icon: 'sports' | 'governing-bodies' | 'organisations' | 'participants';
 }
+
+export interface GoverningBody {
+  id: string;
+  name: string;
+  country: string | null;
+  sportId: string;
+  sport?: Pick<Sport, 'id' | 'name' | 'description' | 'iconUrl'>;
+  organizationCount: number;
+  teamCount: number;
+  participantCount: number;
+}
+
+export interface Organisation {
+  id: string;
+  name: string;
+  city: string | null;
+  governingBodyId: string;
+  governingBody?: Pick<GoverningBody, 'id' | 'name' | 'country' | 'sportId'>;
+  teamCount: number;
+  participantCount: number;
+  squadCount: number;
+  staffCount: number;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  shortName: string | null;
+  logoUrl: string | null;
+  organizationId: string;
+  participantCount: number;
+}
+
+export interface Participant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  jerseyNumber: number | null;
+  position: string | null;
+  teamId: string;
+  team?: Pick<Team, 'id' | 'name' | 'shortName' | 'organizationId'>;
+}
+
+export interface GoverningBodyPayload {
+  name: string;
+  country?: string;
+  sportId: string;
+}
+
+export interface OrganisationPayload {
+  name: string;
+  city?: string;
+  governingBodyId: string;
+}
+
+export interface ParticipantPayload {
+  firstName: string;
+  lastName: string;
+  jerseyNumber?: number;
+  position?: string;
+  teamId: string;
+}
+
+export interface TeamPayload {
+  name: string;
+  shortName?: string;
+  organizationId: string;
+}

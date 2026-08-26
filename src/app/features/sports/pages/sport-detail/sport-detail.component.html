@@ -1,0 +1,28 @@
+<app-hierarchy-detail
+  [breadcrumbs]="breadcrumbs()"
+  eyebrow="Sport"
+  [title]="sport()?.name ?? 'Loading sport…'"
+  [description]="sport()?.description ?? null"
+  [stats]="stats()"
+  childTableTitle="Governing Bodies"
+  [childTableTotal]="governingBodies().length"
+  [childTableColumns]="childColumns"
+  [childTableRows]="childRows()"
+  [isLoading]="isLoading()"
+  [errorMessage]="errorMessage()"
+  emptyMessage="This sport does not have any governing bodies yet."
+  addLabel="Governing Body"
+  (addRequested)="openAddDialog()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addDialogOpen()"
+  title="Add Governing Body"
+  entityLabel="Governing Body"
+  [form]="governingBodyForm"
+  [fields]="addFields"
+  [isSaving]="isAdding()"
+  [errorMessage]="addErrorMessage()"
+  (closed)="closeAddDialog()"
+  (submitted)="addGoverningBody()"
+/>

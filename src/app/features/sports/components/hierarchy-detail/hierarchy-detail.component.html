@@ -1,0 +1,31 @@
+<section class="detail">
+  <app-hierarchy-breadcrumbs [items]="breadcrumbs()" />
+
+  <header class="detail__header">
+    <div>
+      <p class="detail__eyebrow">{{ eyebrow() }}</p>
+      <h2>{{ title() }}</h2>
+      @if (description()) { <p class="detail__description">{{ description() }}</p> }
+    </div>
+    @if (addLabel() || secondaryAddLabel()) {
+      <div class="detail__add-actions">
+        @if (addLabel()) { <button class="detail__add-button" type="button" (click)="addRequested.emit()">+ {{ addLabel() }}</button> }
+        @if (secondaryAddLabel()) { <button class="detail__add-button" type="button" (click)="secondaryAddRequested.emit()">+ {{ secondaryAddLabel() }}</button> }
+      </div>
+    }
+  </header>
+
+  @if (errorMessage()) {
+    <p class="detail__error" role="alert">{{ errorMessage() }}</p>
+  } @else {
+    <app-hierarchy-stat-cards [stats]="stats()" [isLoading]="isLoading()" />
+    <app-hierarchy-child-table
+      [title]="childTableTitle()"
+      [total]="childTableTotal()"
+      [columns]="childTableColumns()"
+      [rows]="childTableRows()"
+      [isLoading]="isLoading()"
+      [emptyMessage]="emptyMessage()"
+    />
+  }
+</section>

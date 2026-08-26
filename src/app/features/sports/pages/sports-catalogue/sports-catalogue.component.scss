@@ -180,7 +180,8 @@
   img, &__fallback { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: var(--surface-raised); object-fit: cover; }
   &__fallback { color: var(--yellow); font-size: 13px; font-weight: 800; }
   > span:last-child { display: grid; gap: 2px; }
-  strong { font-weight: 600; }
+  a { color: var(--white); font-weight: 600; text-decoration: none; }
+  a:hover { color: var(--yellow); }
   small { max-width: 270px; overflow: hidden; color: var(--text-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 }
 

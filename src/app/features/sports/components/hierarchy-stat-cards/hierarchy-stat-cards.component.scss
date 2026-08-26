@@ -1,0 +1,38 @@
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.stat-card {
+  display: grid;
+  min-height: 132px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--background);
+
+  strong { font-size: clamp(24px, 3vw, 36px); font-weight: 500; letter-spacing: -1px; }
+  > span:last-child { color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: 1.4px; text-align: center; text-transform: uppercase; }
+
+  &__icon { width: 21px; height: 21px; border: 1.6px solid var(--text-secondary); border-radius: 50%; }
+  &__icon[data-icon='governing-bodies'] { border-style: double; }
+  &__icon[data-icon='organisations'], &__icon[data-icon='teams'] { border-radius: 3px; }
+  &__icon[data-icon='participants'] { position: relative; width: 24px; border: 0; }
+  &__icon[data-icon='participants']::before, &__icon[data-icon='participants']::after { position: absolute; top: 4px; width: 8px; height: 8px; border: 1.6px solid var(--text-secondary); border-radius: 50%; content: ''; }
+  &__icon[data-icon='participants']::before { left: 2px; }
+  &__icon[data-icon='participants']::after { right: 2px; }
+  &__icon[data-icon='jersey'] { border-radius: 5px 5px 9px 9px; }
+  &__icon[data-icon='position'] { border-radius: 3px; transform: rotate(45deg); }
+
+  &--loading::after { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); content: ''; transform: translateX(-100%); animation: shimmer 1.5s infinite; }
+}
+
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+@media (max-width: 680px) { .stat-cards { grid-template-columns: 1fr; } }
