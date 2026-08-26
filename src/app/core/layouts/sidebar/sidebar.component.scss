@@ -178,6 +178,10 @@
       border-radius: 50% 50% 7px 7px;
     }
 
+    &[data-icon='sports'] {
+      border-radius: 4px;
+    }
+
     &[data-icon='send'] {
       border-radius: 3px 12px 3px 3px;
       transform: rotate(-35deg) scale(.82);

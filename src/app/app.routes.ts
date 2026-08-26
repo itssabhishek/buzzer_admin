@@ -27,6 +27,14 @@ export const routes: Routes = [
           import('./features/dashboard/pages/dashboard/dashboard').then((c) => c.Dashboard),
       },
       {
+        path: 'sports',
+        data: { pageTitle: 'Sport Management' },
+        loadComponent: () =>
+          import('./features/sports/pages/sports-catalogue/sports-catalogue.component').then(
+            (c) => c.SportsCatalogueComponent,
+          ),
+      },
+      {
         path: 'match-management',
         data: { pageTitle: 'Match Management' },
         loadComponent: () =>
