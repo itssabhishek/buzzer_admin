@@ -1,8 +1,17 @@
 import { Routes } from '@angular/router';
 
+import { authGuard } from './core/auth/guards/auth.guard';
+
 export const routes: Routes = [
   {
+    path: 'login',
+    title: 'Login | Buzzer Admin Console',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login.component').then((c) => c.LoginComponent),
+  },
+  {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./core/layouts/app-shell/app-shell.component').then((c) => c.AppShellComponent),
     children: [
