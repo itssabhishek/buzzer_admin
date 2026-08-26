@@ -1,0 +1,39 @@
+.bulk-import { max-width: 1080px; margin: 0 auto; }
+.bulk-import__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.bulk-import__eyebrow { margin-bottom: 4px; color: var(--yellow); font-size: 10px; font-weight: 700; letter-spacing: 1.35px; text-transform: uppercase; }
+.bulk-import h2 { font-size: 24px; letter-spacing: -.5px; }
+.bulk-import__header p:not(.bulk-import__eyebrow) { max-width: 620px; margin-top: 8px; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.bulk-import__header a { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 700; text-decoration: none; }
+.bulk-import__header a:hover { border-color: var(--yellow); color: var(--yellow); }
+.import-card, .report-card { padding: 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--background); }
+.import-card { display: grid; gap: 20px; }
+.import-card__field { display: grid; gap: 8px; max-width: 360px; }
+.import-card label:not(.file-picker) { color: var(--text-secondary); font-size: 12px; font-weight: 700; }
+.import-card select { height: 40px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--white); }
+.import-card__format { display: grid; gap: 5px; padding: 13px; border-radius: 9px; background: var(--surface-raised); color: var(--text-secondary); font-size: 12px; }
+.import-card__format strong { color: var(--white); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.import-card__format code { color: var(--yellow); font-family: inherit; }
+.file-picker { display: grid; min-height: 110px; place-items: center; align-content: center; gap: 7px; border: 1px dashed var(--text-muted); border-radius: 10px; cursor: pointer; text-align: center; }
+.file-picker:hover { border-color: var(--yellow); }
+.file-picker input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+.file-picker span { color: var(--white); font-size: 13px; font-weight: 700; }
+.file-picker small { color: var(--text-muted); font-size: 12px; }
+.file-picker--disabled { cursor: wait; opacity: .55; }
+.bulk-import__error { margin: 0; padding: 11px 12px; border: 1px solid rgba(236, 25, 60, .42); border-radius: 8px; background: rgba(236, 25, 60, .1); color: #ff9aaa; font-size: 13px; }
+.import-card__actions { display: flex; justify-content: flex-end; gap: 10px; }
+.button { min-height: 38px; padding: 0 14px; border: 1px solid transparent; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 700; }
+.button:disabled { cursor: not-allowed; opacity: .55; }
+.button--primary { background: var(--yellow); color: var(--background); }
+.button--ghost { background: var(--surface-raised); color: var(--white); }
+.report-card { margin-top: 22px; padding-bottom: 0; overflow: hidden; }
+.report-card > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 18px; }
+.report-card h3 { font-size: 16px; letter-spacing: -.4px; }
+.report-card p { margin-top: 3px; color: var(--text-muted); font-size: 12px; }
+.report-card__totals { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; font-weight: 700; }
+.is-added { color: #75d699; }.is-skipped { color: var(--yellow); }.is-failed { color: #ff9aaa; }
+.report-card__scroll { overflow-x: auto; margin: 0 -22px; }
+.report-card table { width: 100%; min-width: 620px; border-collapse: collapse; }
+.report-card th, .report-card td { padding: 13px 22px; border-top: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 12px; text-align: left; }
+.report-card th { background: var(--surface-raised); font-size: 11px; }.report-card td:nth-child(2) { color: var(--white); font-weight: 600; }
+.status { display: inline-flex; padding: 3px 7px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; }.status--added { background: rgba(49, 183, 98, .15); color: #75d699; }.status--skipped { background: rgba(255, 205, 47, .12); color: var(--yellow); }.status--failed { background: rgba(236, 25, 60, .12); color: #ff9aaa; }
+@media (max-width: 560px) { .bulk-import__header, .report-card > header { flex-direction: column; }.bulk-import__header a { align-self: flex-start; } }

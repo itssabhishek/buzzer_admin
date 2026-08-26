@@ -9,6 +9,7 @@ import { HierarchyAddDialogComponent, HierarchyAddDialogField } from '../../comp
 import { HierarchyBreadcrumb } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { HierarchyChildTableColumn, HierarchyChildTableRow } from '../../components/hierarchy-child-table/hierarchy-child-table.component';
 import { HierarchyDetailComponent } from '../../components/hierarchy-detail/hierarchy-detail.component';
+import { OrganisationMembersComponent } from '../../components/organisation-members/organisation-members.component';
 import { HierarchyStat } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
 import { GoverningBody, Organisation, Participant, Sport, Team } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
@@ -16,7 +17,7 @@ import { SportsService } from '../../services/sports.service';
 @Component({
   selector: 'app-organisation-detail',
   standalone: true,
-  imports: [HierarchyDetailComponent, HierarchyAddDialogComponent, ReactiveFormsModule],
+  imports: [HierarchyDetailComponent, HierarchyAddDialogComponent, OrganisationMembersComponent, ReactiveFormsModule],
   templateUrl: './organisation-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

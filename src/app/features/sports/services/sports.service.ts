@@ -15,6 +15,11 @@ import {
   ParticipantPayload,
   Sport,
   SportPayload,
+  SquadMember,
+  SquadMemberPayload,
+  StaffMember,
+  StaffMemberPayload,
+  StaffResponse,
   Team,
   TeamPayload,
 } from '../models/sport.model';
@@ -115,6 +120,30 @@ export class SportsService {
     return this.createChild<Team, TeamPayload>('teams', payload);
   }
 
+  getSquad(organizationId: string): Observable<SquadMember[]> {
+    return this.http
+      .get<ApiResponse<SquadMember[]>>(`${this.organizationBaseUrl}/${organizationId}/squad`)
+      .pipe(map((response) => response.data));
+  }
+
+  getStaff(organizationId: string): Observable<StaffResponse> {
+    return this.http
+      .get<ApiResponse<StaffResponse>>(`${this.organizationBaseUrl}/${organizationId}/staff`)
+      .pipe(map((response) => response.data));
+  }
+
+  createSquadMember(organizationId: string, payload: SquadMemberPayload): Observable<SquadMember> {
+    return this.http
+      .post<ApiResponse<SquadMember>>(`${this.organizationBaseUrl}/${organizationId}/squad`, payload)
+      .pipe(map((response) => response.data));
+  }
+
+  createStaffMember(organizationId: string, payload: StaffMemberPayload): Observable<StaffMember> {
+    return this.http
+      .post<ApiResponse<StaffMember>>(`${this.organizationBaseUrl}/${organizationId}/staff`, payload)
+      .pipe(map((response) => response.data));
+  }
+
   private getTotal(path: string): Observable<number> {
     const params = new HttpParams().set('page', 1).set('limit', 1);
 
@@ -125,7 +154,7 @@ export class SportsService {
 
   private getById<T>(resource: string, id: string): Observable<T> {
     return this.http
-      .get<ApiResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}/${id}`)
+      .get<ApiResponse<T>>(`${this.organizationBaseUrl}/${resource}/${id}`)
       .pipe(map((response) => response.data));
   }
 
@@ -144,7 +173,11 @@ export class SportsService {
 
   private createChild<T, TPayload>(resource: string, payload: TPayload): Observable<T> {
     return this.http
-      .post<ApiResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}`, payload)
+      .post<ApiResponse<T>>(`${this.organizationBaseUrl}/${resource}`, payload)
       .pipe(map((response) => response.data));
+  }
+
+  private get organizationBaseUrl(): string {
+    return this.sportsUrl.replace('/sports', '');
   }
 }

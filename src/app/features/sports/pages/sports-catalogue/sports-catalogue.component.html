@@ -6,9 +6,12 @@
       <p class="catalogue__eyebrow">Catalogue</p>
       <h2>Sport Management</h2>
     </div>
-    <button class="button button--outline" type="button" (click)="openCreateDialog()">
-      <span aria-hidden="true">+</span> Add Sport
-    </button>
+    <div class="catalogue__toolbar-actions">
+      <a class="button button--outline" routerLink="/sports/import">Bulk Import</a>
+      <button class="button button--outline" type="button" (click)="openCreateDialog()">
+        <span aria-hidden="true">+</span> Add Sport
+      </button>
+    </div>
   </div>
 
   <div class="catalogue__stats" aria-label="Catalogue totals">

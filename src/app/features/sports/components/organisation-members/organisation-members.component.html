@@ -1,0 +1,46 @@
+<section class="members" aria-labelledby="members-title">
+  <header class="members__header">
+    <div><p>Organisation</p><h3 id="members-title">Members</h3></div>
+  </header>
+
+  @if (errorMessage()) {
+    <p class="members__error" role="alert">{{ errorMessage() }}</p>
+  } @else {
+    <section class="members__section">
+      <header><div><h4>Squad</h4><p>{{ squad().length }} members</p></div><button type="button" (click)="openSquadDialog()">+ Add Squad Member</button></header>
+      <div class="member-grid">
+        @if (isLoading()) {
+          @for (item of [1, 2]; track item) { <article class="member-card member-card--loading"></article> }
+        } @else {
+          @for (member of squad(); track member.id) {
+            <article class="member-card">
+              @if (member.photoUrl) { <img [src]="member.photoUrl" [alt]="member.displayName" /> } @else { <span class="member-card__avatar">{{ initials(member.displayName) }}</span> }
+              <div><strong>{{ member.displayName }}</strong><span>{{ member.position }}</span><small>{{ member.age === null ? 'Age unavailable' : member.age + ' years old' }}</small></div>
+            </article>
+          } @empty { <p class="members__empty">No squad members yet.</p> }
+        }
+      </div>
+    </section>
+
+    <section class="members__section">
+      <header><div><h4>Staff</h4><p>{{ staffCount() }} members</p></div><button type="button" (click)="openStaffDialog()">+ Add Staff Member</button></header>
+      @if (isLoading()) {
+        <div class="member-grid"><article class="member-card member-card--loading"></article><article class="member-card member-card--loading"></article></div>
+      } @else {
+        @for (group of staffGroups(); track group.category) {
+          <div class="staff-group"><h5>{{ categoryLabel(group.category) }}</h5><div class="member-grid">
+            @for (member of group.members; track member.id) {
+              <article class="member-card">
+                @if (member.photoUrl) { <img [src]="member.photoUrl" [alt]="member.name" /> } @else { <span class="member-card__avatar">{{ initials(member.name) }}</span> }
+                <div><strong>{{ member.name }}</strong><span>{{ member.roleTitle }}</span><small>{{ member.nationality ?? 'Nationality unavailable' }}</small></div>
+              </article>
+            }
+          </div></div>
+        } @empty { <p class="members__empty">No staff members yet.</p> }
+      }
+    </section>
+  }
+</section>
+
+<app-hierarchy-add-dialog [isOpen]="squadDialogOpen()" title="Add Squad Member" entityLabel="Squad Member" [form]="squadForm" [fields]="squadFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addSquadMember()" />
+<app-hierarchy-add-dialog [isOpen]="staffDialogOpen()" title="Add Staff Member" entityLabel="Staff Member" [form]="staffForm" [fields]="staffFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addStaffMember()" />

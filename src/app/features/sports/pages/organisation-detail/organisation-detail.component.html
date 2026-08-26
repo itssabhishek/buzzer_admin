@@ -17,6 +17,10 @@
   (secondaryAddRequested)="openAddDialog()"
 />
 
+@if (organisation(); as currentOrganisation) {
+  <app-organisation-members [organizationId]="currentOrganisation.id" />
+}
+
 <app-hierarchy-add-dialog
   [isOpen]="addTeamDialogOpen()"
   title="Add Team"

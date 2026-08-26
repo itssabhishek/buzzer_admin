@@ -30,6 +30,8 @@
     margin-bottom: 24px;
   }
 
+  &__toolbar-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
   &__eyebrow {
     margin-bottom: 4px;
     color: var(--yellow);
@@ -78,6 +80,7 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
+  text-decoration: none;
 
   &:disabled {
     cursor: wait;

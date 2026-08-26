@@ -108,3 +108,49 @@ export interface TeamPayload {
   shortName?: string;
   organizationId: string;
 }
+
+export interface SquadMember {
+  id: string;
+  organizationId: string;
+  userId: string;
+  position: string;
+  agreementEnd: string | null;
+  displayName: string;
+  email: string;
+  photoUrl: string | null;
+  age: number | null;
+}
+
+export interface StaffMember {
+  id: string;
+  organizationId: string;
+  name: string;
+  roleTitle: string;
+  category: 'club_president' | 'executive_management' | 'operations_administration';
+  nationality: string | null;
+  photoUrl: string | null;
+}
+
+export interface StaffGroup {
+  category: StaffMember['category'];
+  members: StaffMember[];
+}
+
+export interface StaffResponse {
+  data: StaffMember[];
+  groups: StaffGroup[];
+}
+
+export interface SquadMemberPayload {
+  userId: string;
+  position: string;
+  agreementEnd?: string;
+}
+
+export interface StaffMemberPayload {
+  name: string;
+  roleTitle: string;
+  category: StaffMember['category'];
+  nationality?: string;
+  photoUrl?: string;
+}

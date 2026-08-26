@@ -35,6 +35,12 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'sports/import',
+        data: { pageTitle: 'Bulk Import' },
+        loadComponent: () =>
+          import('./features/sports/pages/bulk-import/bulk-import.component').then((c) => c.BulkImportComponent),
+      },
+      {
         path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/participants/:participantId',
         data: { pageTitle: 'Participant Details' },
         loadComponent: () =>

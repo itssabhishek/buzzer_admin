@@ -1,0 +1,63 @@
+<section class="bulk-import">
+  <app-hierarchy-breadcrumbs [items]="[{ label: 'Sports', route: '/sports' }, { label: 'Bulk Import' }]" />
+
+  <header class="bulk-import__header">
+    <div>
+      <p class="bulk-import__eyebrow">Catalogue</p>
+      <h2>Bulk Import</h2>
+      <p>Upload a CSV or JSON file. Records are posted one at a time to protect the API rate limit.</p>
+    </div>
+    <a routerLink="/sports">Back to Sports</a>
+  </header>
+
+  <section class="import-card">
+    <div class="import-card__field">
+      <label for="import-entity">Import records</label>
+      <select id="import-entity" [value]="selectedEntityType()" (change)="selectEntityType($any($event.target).value)" [disabled]="isImporting()">
+        @for (option of entityOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+      </select>
+    </div>
+
+    <div class="import-card__format">
+      <strong>Required columns</strong>
+      <code>{{ selectedEntity().requiredFields.join(', ') }}</code>
+      @if (selectedEntity().optionalFields.length) {
+        <span>Optional: {{ selectedEntity().optionalFields.join(', ') }}</span>
+      }
+    </div>
+
+    <label class="file-picker" [class.file-picker--disabled]="isImporting()">
+      <input type="file" accept=".csv,application/json,.json,text/csv" [disabled]="isImporting()" (change)="selectFile($any($event.target).files?.[0])" />
+      <span>{{ selectedFileName() ?? 'Choose CSV or JSON file' }}</span>
+      <small>{{ rows().length ? rows().length + ' rows ready to import' : 'CSV header names must match the fields above.' }}</small>
+    </label>
+
+    @if (errorMessage()) { <p class="bulk-import__error" role="alert">{{ errorMessage() }}</p> }
+
+    <div class="import-card__actions">
+      @if (selectedFileName()) { <button type="button" class="button button--ghost" (click)="clearFile()" [disabled]="isImporting()">Clear</button> }
+      <button type="button" class="button button--primary" [disabled]="!rows().length || isImporting()" (click)="importRows()">
+        {{ isImporting() ? 'Importing ' + reports().length + ' of ' + rows().length + '…' : 'Start Import' }}
+      </button>
+    </div>
+  </section>
+
+  @if (reports().length) {
+    <section class="report-card" aria-live="polite">
+      <header>
+        <div><h3>Import Report</h3><p>{{ reports().length }} of {{ rows().length }} processed</p></div>
+        <div class="report-card__totals"><span class="is-added">{{ addedCount() }} added</span><span class="is-skipped">{{ skippedCount() }} skipped</span>@if (failedCount()) { <span class="is-failed">{{ failedCount() }} failed</span> }</div>
+      </header>
+      <div class="report-card__scroll">
+        <table>
+          <thead><tr><th>Row</th><th>Record</th><th>Status</th><th>Details</th></tr></thead>
+          <tbody>
+            @for (report of reports(); track report.rowNumber) {
+              <tr><td>{{ report.rowNumber }}</td><td>{{ report.label }}</td><td><span class="status" [class]="'status--' + report.status">{{ report.status }}</span></td><td>{{ report.message }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

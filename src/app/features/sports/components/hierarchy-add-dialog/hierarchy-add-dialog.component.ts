@@ -9,7 +9,7 @@ export interface HierarchyAddDialogOption {
 export interface HierarchyAddDialogField {
   controlName: string;
   label: string;
-  type?: 'number' | 'select' | 'text';
+  type?: 'date' | 'number' | 'select' | 'text';
   placeholder?: string;
   options?: HierarchyAddDialogOption[];
 }
