@@ -1,0 +1,9 @@
+<div class="ui-field">
+  <span class="ui-field__label">{{ label() }}</span>
+  <ng-content />
+  @if (error(); as error) {
+    <span class="ui-field__message ui-field__message--error" role="alert">{{ error }}</span>
+  } @else if (hint(); as hint) {
+    <span class="ui-field__hint">{{ hint }}</span>
+  }
+</div>

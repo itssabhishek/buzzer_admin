@@ -1,0 +1,14 @@
+<div class="app-message-field">
+  <textarea
+    class="ui-textarea"
+    [attr.aria-label]="ariaLabel()"
+    [attr.maxlength]="maxLength()"
+    [disabled]="disabled()"
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="updateValue($event)"
+  ></textarea>
+  @if (maxLength(); as maxLength) {
+    <span>{{ value().length }} / {{ maxLength }}</span>
+  }
+</div>

@@ -1,13 +1,16 @@
-import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, finalize, Subject } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, finalize, skip } from 'rxjs';
 
 import { CatalogueStat, PaginationMeta, Sport, SportPayload } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
+import { ButtonComponent } from '../../../../common/components/ui';
+import { AppSearchService } from '../../../../core/search/app-search.service';
+import { HierarchyBreadcrumb, HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
+import { HierarchyStatCardsComponent } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
 
 const PAGE_SIZE = 10;
 const EMPTY_META: PaginationMeta = { page: 1, limit: PAGE_SIZE, total: 0, totalPages: 1 };
@@ -15,7 +18,7 @@ const EMPTY_META: PaginationMeta = { page: 1, limit: PAGE_SIZE, total: 0, totalP
 @Component({
   selector: 'app-sports-catalogue',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule, RouterLink],
+  imports: [ButtonComponent, HierarchyBreadcrumbsComponent, HierarchyStatCardsComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './sports-catalogue.component.html',
   styleUrl: './sports-catalogue.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,12 +27,13 @@ export class SportsCatalogueComponent {
   private readonly sportsService = inject(SportsService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly searchInput = new Subject<string>();
+  private readonly appSearch = inject(AppSearchService);
+  private readonly router = inject(Router);
 
   readonly sports = signal<Sport[]>([]);
   readonly stats = signal<CatalogueStat[]>([]);
   readonly meta = signal<PaginationMeta>(EMPTY_META);
-  readonly search = signal('');
+  readonly search = signal(this.appSearch.searchTerm());
   readonly isLoading = signal(true);
   readonly isSaving = signal(false);
   readonly isDeleting = signal(false);
@@ -42,10 +46,11 @@ export class SportsCatalogueComponent {
     description: ['', [Validators.maxLength(500)]],
     iconUrl: ['', [Validators.pattern(/^https?:\/\/.+/i)]],
   });
+  readonly breadcrumbItems: HierarchyBreadcrumb[] = [{ label: 'Sport' }];
 
   constructor() {
-    this.searchInput
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+    toObservable(this.appSearch.searchTerm)
+      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((search) => {
         this.search.set(search);
         this.loadSports(1);
@@ -55,14 +60,14 @@ export class SportsCatalogueComponent {
     this.loadStats();
   }
 
-  updateSearch(value: string): void {
-    this.searchInput.next(value);
-  }
-
   changePage(page: number): void {
     if (page >= 1 && page <= this.meta().totalPages && page !== this.meta().page) {
       this.loadSports(page);
     }
+  }
+
+  openBulkImport(): void {
+    void this.router.navigate(['/sports/import']);
   }
 
   openCreateDialog(): void {

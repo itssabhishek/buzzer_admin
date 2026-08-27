@@ -1,0 +1,30 @@
+.app-switch {
+  display: inline-flex;
+  width: 51px;
+  height: 31px;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--ds-border);
+  border-radius: 999px;
+  background: var(--ds-surface-raised);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+
+  span {
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: var(--ds-text-secondary);
+    transition: transform 160ms ease, background-color 160ms ease;
+  }
+
+  &:focus-visible { outline: 2px solid var(--ds-primary); outline-offset: 2px; }
+  &:disabled { cursor: not-allowed; opacity: 0.48; }
+
+  &--checked {
+    border-color: var(--yellow);
+    background: var(--yellow);
+
+    span { background: var(--ds-canvas); transform: translateX(20px); }
+  }
+}

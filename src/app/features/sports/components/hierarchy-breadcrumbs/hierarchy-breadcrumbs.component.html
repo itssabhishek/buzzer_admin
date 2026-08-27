@@ -1,10 +1,9 @@
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   @for (item of items(); track item.label; let isLast = $last) {
     @if (item.route && !isLast) {
-      <a [routerLink]="item.route">{{ item.label }}</a>
+      <a class="breadcrumbs__item" [routerLink]="item.route">{{ item.label }}</a>
     } @else {
-      <span [attr.aria-current]="isLast ? 'page' : null">{{ item.label }}</span>
+      <span class="breadcrumbs__item" [class.breadcrumbs__item--current]="isLast" [attr.aria-current]="isLast ? 'page' : null">{{ item.label }}</span>
     }
-    @if (!isLast) { <span class="breadcrumbs__separator" aria-hidden="true">/</span> }
   }
 </nav>

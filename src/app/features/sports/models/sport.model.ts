@@ -9,6 +9,7 @@ export interface Sport {
   participantCount: number;
   createdAt: string;
   updatedAt: string;
+  onboardedAt?: string | null;
 }
 
 export interface SportPayload {
@@ -50,6 +51,10 @@ export interface GoverningBody {
   organizationCount: number;
   teamCount: number;
   participantCount: number;
+  iconUrl?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  onboardedAt?: string | null;
 }
 
 export interface Organisation {
@@ -62,6 +67,10 @@ export interface Organisation {
   participantCount: number;
   squadCount: number;
   staffCount: number;
+  iconUrl?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  onboardedAt?: string | null;
 }
 
 export interface Team {

@@ -2,17 +2,28 @@
   [breadcrumbs]="breadcrumbs()"
   eyebrow="Sport"
   [title]="sport()?.name ?? 'Loading sport…'"
-  [description]="sport()?.description ?? null"
+  [recordIcon]="sport()?.iconUrl ?? null"
+  [metadata]="metadata()"
+  metadataLayout="stacked"
+  [allowRecordEdit]="true"
+  [allowRecordDelete]="true"
   [stats]="stats()"
-  childTableTitle="Governing Bodies"
+  childTableTitle="Main Entities"
+  childTableFirstColumnLabel="Main Entities"
   [childTableTotal]="governingBodies().length"
   [childTableColumns]="childColumns"
   [childTableRows]="childRows()"
   [isLoading]="isLoading()"
   [errorMessage]="errorMessage()"
   emptyMessage="This sport does not have any governing bodies yet."
+  [allowChildEdit]="true"
+  [allowChildDelete]="true"
   addLabel="Governing Body"
   (addRequested)="openAddDialog()"
+  (recordEditRequested)="openSportEdit()"
+  (recordDeleteRequested)="requestSportDelete()"
+  (childEditRequested)="openGoverningBodyEdit($event)"
+  (childDeleteRequested)="requestGoverningBodyDelete($event)"
 />
 
 <app-hierarchy-add-dialog
@@ -26,3 +37,39 @@
   (closed)="closeAddDialog()"
   (submitted)="addGoverningBody()"
 />
+
+<app-hierarchy-add-dialog
+  [isOpen]="sportEditDialogOpen()"
+  mode="edit"
+  title="Edit Sport"
+  entityLabel="Sport"
+  [form]="sportEditForm"
+  [fields]="sportEditFields"
+  [isSaving]="isSavingSport()"
+  [errorMessage]="sportEditErrorMessage()"
+  (closed)="closeSportEdit()"
+  (submitted)="saveSportEdit()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="governingBodyEditDialogOpen()"
+  mode="edit"
+  title="Edit Governing Body"
+  entityLabel="Governing Body"
+  [form]="governingBodyForm"
+  [fields]="addFields"
+  [isSaving]="isSavingGoverningBody()"
+  [errorMessage]="governingBodyEditErrorMessage()"
+  (closed)="closeGoverningBodyEdit()"
+  (submitted)="saveGoverningBodyEdit()"
+/>
+
+@if (deletingSport() || deletingGoverningBody()) {
+  <app-dialog [open]="true" size="compact" [title]="'Delete ' + deleteTargetName() + '?'" description="This record will no longer be available in the catalogue." [statusIcon]="null" (closed)="cancelDelete()">
+    @if (deleteErrorMessage(); as error) { <p role="alert">{{ error }}</p> }
+    <div dialogActions>
+      <app-button variant="outline" type="button" [disabled]="isDeleting()" (clicked)="cancelDelete()">Cancel</app-button>
+      <app-button variant="danger" type="button" [loading]="isDeleting()" (clicked)="deleteSelected()">Delete</app-button>
+    </div>
+  </app-dialog>
+}

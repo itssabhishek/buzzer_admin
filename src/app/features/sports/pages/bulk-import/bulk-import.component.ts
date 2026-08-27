@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { ButtonComponent, FieldComponent } from '../../../../common/components/ui';
 import { HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { BulkImportEntityOption, BulkImportReport, BulkImportRow, ImportEntityType } from '../../models/bulk-import.model';
 import { BulkImportService } from '../../services/bulk-import.service';
@@ -16,7 +17,7 @@ const ENTITY_OPTIONS: BulkImportEntityOption[] = [
 @Component({
   selector: 'app-bulk-import',
   standalone: true,
-  imports: [HierarchyBreadcrumbsComponent, RouterLink],
+  imports: [ButtonComponent, FieldComponent, HierarchyBreadcrumbsComponent, RouterLink],
   templateUrl: './bulk-import.component.html',
   styleUrl: './bulk-import.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

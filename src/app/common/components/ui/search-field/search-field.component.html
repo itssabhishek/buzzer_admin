@@ -1,0 +1,13 @@
+<label class="app-search-field">
+  <span class="visually-hidden">{{ ariaLabel() }}</span>
+  <img class="app-search-field__icon" [src]="iconSrc()" width="24" height="24" alt="" aria-hidden="true" />
+  <input
+    class="ui-input"
+    type="search"
+    [attr.aria-label]="ariaLabel()"
+    [disabled]="disabled()"
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="updateValue($event)"
+  />
+</label>

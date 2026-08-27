@@ -1,50 +1,66 @@
 <section class="bulk-import">
-  <app-hierarchy-breadcrumbs [items]="[{ label: 'Sports', route: '/sports' }, { label: 'Bulk Import' }]" />
-
-  <header class="bulk-import__header">
-    <div>
-      <p class="bulk-import__eyebrow">Catalogue</p>
-      <h2>Bulk Import</h2>
-      <p>Upload a CSV or JSON file. Records are posted one at a time to protect the API rate limit.</p>
-    </div>
-    <a routerLink="/sports">Back to Sports</a>
+  <header class="bulk-import__toolbar">
+    <app-hierarchy-breadcrumbs [items]="[{ label: 'Sports', route: '/sports' }, { label: 'Bulk Import' }]" />
+    <a class="bulk-import__back" routerLink="/sports">
+      <img src="assets/svg/Icons=ic_arrow_left.svg" width="16" height="16" alt="" aria-hidden="true" />
+      Back to Sports
+    </a>
   </header>
 
-  <section class="import-card">
-    <div class="import-card__field">
-      <label for="import-entity">Import records</label>
-      <select id="import-entity" [value]="selectedEntityType()" (change)="selectEntityType($any($event.target).value)" [disabled]="isImporting()">
-        @for (option of entityOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
-      </select>
+  <section class="bulk-import__intro">
+    <h2>Bulk Import</h2>
+    <p>Upload a CSV or JSON file to add multiple records at once.</p>
+  </section>
+
+  <section class="import-card" aria-labelledby="import-setup-title">
+    <div class="import-card__heading">
+      <div>
+        <h3 id="import-setup-title">Import setup</h3>
+        <p>Select the records you want to add, then upload a matching file.</p>
+      </div>
     </div>
 
-    <div class="import-card__format">
-      <strong>Required columns</strong>
-      <code>{{ selectedEntity().requiredFields.join(', ') }}</code>
-      @if (selectedEntity().optionalFields.length) {
-        <span>Optional: {{ selectedEntity().optionalFields.join(', ') }}</span>
-      }
-    </div>
+    <div class="import-card__body">
+      <div class="import-card__details">
+        <app-field label="Import records">
+          <select class="ui-select" id="import-entity" [value]="selectedEntityType()" (change)="selectEntityType($any($event.target).value)" [disabled]="isImporting()">
+            @for (option of entityOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+          </select>
+        </app-field>
 
-    <label class="file-picker" [class.file-picker--disabled]="isImporting()">
-      <input type="file" accept=".csv,application/json,.json,text/csv" [disabled]="isImporting()" (change)="selectFile($any($event.target).files?.[0])" />
-      <span>{{ selectedFileName() ?? 'Choose CSV or JSON file' }}</span>
-      <small>{{ rows().length ? rows().length + ' rows ready to import' : 'CSV header names must match the fields above.' }}</small>
-    </label>
+        <div class="import-card__format">
+          <strong>Required columns</strong>
+          <code>{{ selectedEntity().requiredFields.join(', ') }}</code>
+          @if (selectedEntity().optionalFields.length) {
+            <span>Optional: {{ selectedEntity().optionalFields.join(', ') }}</span>
+          }
+        </div>
+      </div>
+
+      <label class="file-picker" [class.file-picker--ready]="selectedFileName()" [class.file-picker--disabled]="isImporting()">
+        <input type="file" accept=".csv,application/json,.json,text/csv" [disabled]="isImporting()" (change)="selectFile($any($event.target).files?.[0])" />
+        <img src="assets/svg/Icons=ic_documents.svg" width="28" height="28" alt="" aria-hidden="true" />
+        <strong>{{ selectedFileName() ?? 'Choose CSV or JSON file' }}</strong>
+        <span>{{ rows().length ? rows().length + ' rows ready to import' : 'CSV header names must match the required columns.' }}</span>
+      </label>
+    </div>
 
     @if (errorMessage()) { <p class="bulk-import__error" role="alert">{{ errorMessage() }}</p> }
 
     <div class="import-card__actions">
-      @if (selectedFileName()) { <button type="button" class="button button--ghost" (click)="clearFile()" [disabled]="isImporting()">Clear</button> }
-      <button type="button" class="button button--primary" [disabled]="!rows().length || isImporting()" (click)="importRows()">
+      @if (selectedFileName()) {
+        <app-button variant="outline" type="button" [disabled]="isImporting()" (clicked)="clearFile()">Clear</app-button>
+      }
+      <app-button type="button" [disabled]="!rows().length" [loading]="isImporting()" (clicked)="importRows()">
+        <img src="assets/svg/Icons=ic_documents.svg" width="16" height="16" alt="" aria-hidden="true" />
         {{ isImporting() ? 'Importing ' + reports().length + ' of ' + rows().length + '…' : 'Start Import' }}
-      </button>
+      </app-button>
     </div>
   </section>
 
   @if (reports().length) {
     <section class="report-card" aria-live="polite">
-      <header>
+      <header class="report-card__header">
         <div><h3>Import Report</h3><p>{{ reports().length }} of {{ rows().length }} processed</p></div>
         <div class="report-card__totals"><span class="is-added">{{ addedCount() }} added</span><span class="is-skipped">{{ skippedCount() }} skipped</span>@if (failedCount()) { <span class="is-failed">{{ failedCount() }} failed</span> }</div>
       </header>

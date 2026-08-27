@@ -1,0 +1,10 @@
+<span
+  class="app-tag"
+  [class.app-tag--active]="active()"
+  [class.app-tag--small]="size() === 'small'"
+  [class.app-tag--primary]="tone() === 'primary'"
+  [class.app-tag--success]="tone() === 'success'"
+  [class.app-tag--danger]="tone() === 'danger'"
+>
+  <ng-content />
+</span>

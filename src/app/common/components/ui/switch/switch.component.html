@@ -1,0 +1,12 @@
+<button
+  class="app-switch"
+  type="button"
+  role="switch"
+  [class.app-switch--checked]="checked()"
+  [attr.aria-checked]="checked()"
+  [attr.aria-label]="ariaLabel()"
+  [disabled]="disabled()"
+  (click)="toggle()"
+>
+  <span aria-hidden="true"></span>
+</button>

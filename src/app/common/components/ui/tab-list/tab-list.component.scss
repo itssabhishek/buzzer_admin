@@ -1,0 +1,24 @@
+.app-tab-list {
+  display: inline-flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--ds-border);
+
+  button {
+    min-height: 41px;
+    padding: 0 16px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--ds-text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+
+    &:hover:not(:disabled) { color: var(--ds-text); }
+    &:focus-visible { outline: 2px solid var(--ds-primary); outline-offset: -2px; }
+    &:disabled { cursor: not-allowed; opacity: 0.48; }
+  }
+
+  &__tab--active { border-bottom-color: var(--ds-primary) !important; color: var(--ds-text) !important; }
+  &--transparent { border-bottom-color: transparent; }
+}

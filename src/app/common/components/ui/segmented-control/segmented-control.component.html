@@ -1,0 +1,13 @@
+<div class="segmented-control" [class.segmented-control--small]="size() === 'small'" role="group">
+  @for (item of items(); track item.id) {
+    <button
+      type="button"
+      [class.segmented-control__option--active]="item.id === value()"
+      [disabled]="item.disabled"
+      [attr.aria-pressed]="item.id === value()"
+      (click)="select(item)"
+    >
+      {{ item.label }}
+    </button>
+  }
+</div>

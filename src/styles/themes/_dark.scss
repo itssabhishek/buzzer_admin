@@ -1,9 +1,10 @@
 :root {
+  /* Figma foundations */
   --background: #131515;
   --surface: #212121;
   --surface-raised: #292b2b;
-  --surface-hover: #303232;
-  --border: #303232;
+  --surface-hover: #3e3e3e;
+  --border: #3e3e3e;
   --border-subtle: #282a2a;
   --yellow: #ffb414;
   --red: #ec193c;
@@ -15,4 +16,30 @@
   --text-secondary: #a9aeae;
   --text-muted: #747979;
   --focus-ring: rgba(255, 180, 20, 0.45);
+  --icon-brand-yellow-filter: invert(44.93%) sepia(28.23%) saturate(3438.26%) hue-rotate(338.28deg) brightness(138.46%) contrast(183.08%);
+
+  --font-display: 'Poppins', Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --ds-canvas: var(--background);
+  --ds-surface: var(--surface);
+  --ds-surface-raised: var(--surface-raised);
+  --ds-surface-hover: var(--surface-hover);
+  --ds-border: var(--border);
+  --ds-border-subtle: var(--border-subtle);
+  --ds-text: var(--text-primary);
+  --ds-text-secondary: var(--text-secondary);
+  --ds-text-muted: var(--text-muted);
+  --ds-primary: var(--red);
+  --ds-danger: var(--red);
+  --ds-success: var(--green);
+
+  --ds-radius-control: 8px;
+  --ds-radius-card: 12px;
+  --ds-radius-dialog: 16px;
+  --ds-control-height: 44px;
+  --ds-control-height-small: 36px;
+  --ds-control-height-icon: 32px;
+  --ds-control-height-list: 22px;
+  --ds-control-height-badge: 58px;
 }

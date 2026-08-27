@@ -6,11 +6,12 @@ import { finalize, forkJoin } from 'rxjs';
 import { SquadMember, StaffGroup } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
 import { HierarchyAddDialogComponent, HierarchyAddDialogField } from '../hierarchy-add-dialog/hierarchy-add-dialog.component';
+import { ButtonComponent } from '../../../../common/components/ui';
 
 @Component({
   selector: 'app-organisation-members',
   standalone: true,
-  imports: [HierarchyAddDialogComponent, ReactiveFormsModule],
+  imports: [ButtonComponent, HierarchyAddDialogComponent, ReactiveFormsModule],
   templateUrl: './organisation-members.component.html',
   styleUrl: './organisation-members.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

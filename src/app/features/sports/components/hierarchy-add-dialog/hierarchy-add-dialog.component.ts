@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+import { ButtonComponent, DialogComponent, FieldComponent } from '../../../../common/components/ui';
+
 export interface HierarchyAddDialogOption {
   label: string;
   value: string;
@@ -17,13 +19,14 @@ export interface HierarchyAddDialogField {
 @Component({
   selector: 'app-hierarchy-add-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ButtonComponent, DialogComponent, FieldComponent],
   templateUrl: './hierarchy-add-dialog.component.html',
   styleUrl: './hierarchy-add-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchyAddDialogComponent {
   readonly isOpen = input(false);
+  readonly mode = input<'add' | 'edit'>('add');
   readonly title = input.required<string>();
   readonly entityLabel = input.required<string>();
   readonly form = input.required<FormGroup>();

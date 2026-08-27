@@ -1,18 +1,11 @@
 <section class="child-table" [attr.aria-label]="title()">
-  <header class="child-table__header">
-    <div>
-      <h3>{{ title() }}</h3>
-      <p>{{ total() }} total</p>
-    </div>
-  </header>
-
   <div class="child-table__scroll">
     <table>
       <thead>
         <tr>
-          <th>{{ title().slice(0, -1) }}</th>
-          @for (column of columns(); track column.key) { <th>{{ column.label }}</th> }
-          <th><span class="visually-hidden">Open details</span></th>
+          <th><span class="child-table__column-heading">{{ displayFirstColumnLabel() }} <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+          @for (column of columns(); track column.key) { <th><span class="child-table__column-heading">{{ column.label }} <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th> }
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -23,13 +16,24 @@
             <tr>
               <td>
                 @if (row.route) {
-                  <a class="child-table__name" [routerLink]="row.route"><strong>{{ row.title }}</strong>@if (row.subtitle) { <small>{{ row.subtitle }}</small> }</a>
+                  <a class="child-table__name" [routerLink]="row.route">{{ row.title }}</a>
                 } @else {
-                  <span class="child-table__name"><strong>{{ row.title }}</strong>@if (row.subtitle) { <small>{{ row.subtitle }}</small> }</span>
+                  <span class="child-table__name">{{ row.title }}</span>
                 }
               </td>
               @for (column of columns(); track column.key) { <td>{{ row.values[column.key] ?? '—' }}</td> }
-              <td class="child-table__action">@if (row.route) { <a [routerLink]="row.route" [attr.aria-label]="'Open ' + row.title">View</a> }</td>
+              <td class="child-table__action">
+                @if (allowEdit()) {
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + row.title" (clicked)="editRequested.emit(row)">
+                    <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
+                  </app-button>
+                }
+                @if (allowDelete()) {
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + row.title" (clicked)="deleteRequested.emit(row)">
+                    <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
+                  </app-button>
+                }
+              </td>
             </tr>
           } @empty {
             <tr><td class="child-table__empty" [attr.colspan]="columns().length + 2">{{ emptyMessage() }}</td></tr>

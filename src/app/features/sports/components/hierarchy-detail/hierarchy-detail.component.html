@@ -1,17 +1,38 @@
 <section class="detail">
   <app-hierarchy-breadcrumbs [items]="breadcrumbs()" />
 
-  <header class="detail__header">
-    <div>
-      <p class="detail__eyebrow">{{ eyebrow() }}</p>
-      <h2>{{ title() }}</h2>
-      @if (description()) { <p class="detail__description">{{ description() }}</p> }
-    </div>
-    @if (addLabel() || secondaryAddLabel()) {
-      <div class="detail__add-actions">
-        @if (addLabel()) { <button class="detail__add-button" type="button" (click)="addRequested.emit()">+ {{ addLabel() }}</button> }
-        @if (secondaryAddLabel()) { <button class="detail__add-button" type="button" (click)="secondaryAddRequested.emit()">+ {{ secondaryAddLabel() }}</button> }
+  <header class="detail__record" [class.detail__record--stacked]="metadataLayout() === 'stacked'">
+    <div class="detail__record-title">
+      @if (recordIcon(); as recordIcon) {
+        <img [src]="recordIcon" width="20" height="20" [alt]="title() + ' icon'" />
+      }
+      <div>
+        <h2>{{ title() }}</h2>
+        @if (description()) { <p class="detail__description">{{ description() }}</p> }
       </div>
+    </div>
+
+    @if (allowRecordEdit() || allowRecordDelete()) {
+      <div class="detail__record-actions">
+        @if (allowRecordEdit()) {
+          <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + title()" (clicked)="recordEditRequested.emit()">
+            <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
+          </app-button>
+        }
+        @if (allowRecordDelete()) {
+          <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + title()" (clicked)="recordDeleteRequested.emit()">
+            <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
+          </app-button>
+        }
+      </div>
+    }
+
+    @if (metadata().length) {
+      <dl class="detail__metadata">
+        @for (item of metadata(); track item.label) {
+          <div><dt>{{ item.label }}:</dt><dd>{{ item.value }}</dd></div>
+        }
+      </dl>
     }
   </header>
 
@@ -19,13 +40,37 @@
     <p class="detail__error" role="alert">{{ errorMessage() }}</p>
   } @else {
     <app-hierarchy-stat-cards [stats]="stats()" [isLoading]="isLoading()" />
+    <div class="detail__table-heading">
+      <h3>{{ childTableTitle() }}</h3>
+      @if (addLabel() || secondaryAddLabel()) {
+      <div class="detail__add-actions">
+          @if (addLabel()) {
+            <app-button variant="outline" size="small" (clicked)="addRequested.emit()">
+              <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+              Add {{ addLabel() }}
+            </app-button>
+          }
+          @if (secondaryAddLabel()) {
+            <app-button variant="outline" size="small" (clicked)="secondaryAddRequested.emit()">
+              <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+              Add {{ secondaryAddLabel() }}
+            </app-button>
+          }
+        </div>
+      }
+    </div>
     <app-hierarchy-child-table
       [title]="childTableTitle()"
+      [firstColumnLabel]="childTableFirstColumnLabel()"
       [total]="childTableTotal()"
       [columns]="childTableColumns()"
       [rows]="childTableRows()"
       [isLoading]="isLoading()"
       [emptyMessage]="emptyMessage()"
+      [allowEdit]="allowChildEdit()"
+      [allowDelete]="allowChildDelete()"
+      (editRequested)="childEditRequested.emit($event)"
+      (deleteRequested)="childDeleteRequested.emit($event)"
     />
   }
 </section>

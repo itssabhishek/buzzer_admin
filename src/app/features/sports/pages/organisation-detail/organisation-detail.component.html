@@ -2,7 +2,11 @@
   [breadcrumbs]="breadcrumbs()"
   eyebrow="Organisation"
   [title]="organisation()?.name ?? 'Loading organisation…'"
-  [description]="organisation()?.city ? 'Based in ' + organisation()?.city : null"
+  [recordIcon]="organisation()?.iconUrl ?? null"
+  [metadata]="metadata()"
+  metadataLayout="stacked"
+  [allowRecordEdit]="true"
+  [allowRecordDelete]="true"
   [stats]="stats()"
   childTableTitle="Participants"
   [childTableTotal]="participants().length"
@@ -11,10 +15,16 @@
   [isLoading]="isLoading()"
   [errorMessage]="errorMessage()"
   emptyMessage="This organisation does not have any participants yet."
+  [allowChildEdit]="true"
+  [allowChildDelete]="true"
   addLabel="Team"
   secondaryAddLabel="Participant"
   (addRequested)="openAddTeamDialog()"
   (secondaryAddRequested)="openAddDialog()"
+  (recordEditRequested)="openOrganisationEdit()"
+  (recordDeleteRequested)="requestOrganisationDelete()"
+  (childEditRequested)="openParticipantEdit($event)"
+  (childDeleteRequested)="requestParticipantDelete($event)"
 />
 
 @if (organisation(); as currentOrganisation) {
@@ -44,3 +54,39 @@
   (closed)="closeAddDialog()"
   (submitted)="addParticipant()"
 />
+
+<app-hierarchy-add-dialog
+  [isOpen]="organisationEditDialogOpen()"
+  mode="edit"
+  title="Edit Organisation"
+  entityLabel="Organisation"
+  [form]="organisationEditForm"
+  [fields]="organisationEditFields"
+  [isSaving]="isSavingEdit()"
+  [errorMessage]="editErrorMessage()"
+  (closed)="closeEditDialogs()"
+  (submitted)="saveOrganisationEdit()"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="participantEditDialogOpen()"
+  mode="edit"
+  title="Edit Participant"
+  entityLabel="Participant"
+  [form]="participantForm"
+  [fields]="addFields()"
+  [isSaving]="isSavingEdit()"
+  [errorMessage]="editErrorMessage()"
+  (closed)="closeEditDialogs()"
+  (submitted)="saveParticipantEdit()"
+/>
+
+@if (deletingOrganisation() || deletingParticipant()) {
+  <app-dialog [open]="true" size="compact" [title]="'Delete ' + deleteTargetName() + '?'" description="This record will no longer be available in the catalogue." [statusIcon]="null" (closed)="cancelDelete()">
+    @if (deleteErrorMessage(); as error) { <p role="alert">{{ error }}</p> }
+    <div dialogActions>
+      <app-button variant="outline" type="button" [disabled]="isDeleting()" (clicked)="cancelDelete()">Cancel</app-button>
+      <app-button variant="danger" type="button" [loading]="isDeleting()" (clicked)="deleteSelected()">Delete</app-button>
+    </div>
+  </app-dialog>
+}

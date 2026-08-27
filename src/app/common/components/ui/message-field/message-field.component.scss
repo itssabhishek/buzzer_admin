@@ -1,0 +1,10 @@
+.app-message-field {
+  display: grid;
+  gap: 6px;
+
+  span {
+    color: var(--ds-text-muted);
+    font-size: 10px;
+    text-align: right;
+  }
+}

@@ -42,7 +42,7 @@ export const routes: Routes = [
       },
       {
         path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/participants/:participantId',
-        data: { pageTitle: 'Participant Details' },
+        data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
           import('./features/sports/pages/participant-detail/participant-detail.component').then(
             (c) => c.ParticipantDetailComponent,
@@ -50,7 +50,7 @@ export const routes: Routes = [
       },
       {
         path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId',
-        data: { pageTitle: 'Organisation Details' },
+        data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
           import('./features/sports/pages/organisation-detail/organisation-detail.component').then(
             (c) => c.OrganisationDetailComponent,
@@ -58,7 +58,7 @@ export const routes: Routes = [
       },
       {
         path: 'sports/:sportId/governing-bodies/:governingBodyId',
-        data: { pageTitle: 'Governing Body Details' },
+        data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
           import('./features/sports/pages/governing-body-detail/governing-body-detail.component').then(
             (c) => c.GoverningBodyDetailComponent,
@@ -66,7 +66,7 @@ export const routes: Routes = [
       },
       {
         path: 'sports/:sportId',
-        data: { pageTitle: 'Sport Details' },
+        data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
           import('./features/sports/pages/sport-detail/sport-detail.component').then((c) => c.SportDetailComponent),
       },

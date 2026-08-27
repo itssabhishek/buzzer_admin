@@ -1,45 +1,22 @@
 <section class="catalogue">
-  <div class="catalogue__breadcrumbs" aria-label="Breadcrumb"><span>Sport</span></div>
-
   <div class="catalogue__toolbar">
-    <div>
-      <p class="catalogue__eyebrow">Catalogue</p>
-      <h2>Sport Management</h2>
-    </div>
+    <app-hierarchy-breadcrumbs [items]="breadcrumbItems" />
     <div class="catalogue__toolbar-actions">
-      <a class="button button--outline" routerLink="/sports/import">Bulk Import</a>
-      <button class="button button--outline" type="button" (click)="openCreateDialog()">
-        <span aria-hidden="true">+</span> Add Sport
-      </button>
+      <app-button variant="outline" size="small" (clicked)="openBulkImport()">
+        <img src="assets/svg/Icons=ic_documents.svg" width="16" height="16" alt="" aria-hidden="true" />
+        Bulk Import
+      </app-button>
+      <app-button variant="outline" size="small" (clicked)="openCreateDialog()">
+        <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+        Add Sport
+      </app-button>
     </div>
   </div>
 
-  <div class="catalogue__stats" aria-label="Catalogue totals">
-    @for (stat of stats(); track stat.label) {
-      <article class="stat-card">
-        <span class="stat-card__icon" [attr.data-icon]="stat.icon" aria-hidden="true"></span>
-        <strong>{{ stat.value | number }}</strong>
-        <span>{{ stat.label }}</span>
-      </article>
-    } @empty {
-      @for (item of [1, 2, 3, 4]; track item) {
-        <article class="stat-card stat-card--loading" aria-label="Loading statistic"></article>
-      }
-    }
-  </div>
+  <app-hierarchy-stat-cards class="catalogue__stats" [stats]="stats()" [isLoading]="isLoading()" [columns]="4" />
 
   <section class="table-card" aria-labelledby="sports-table-title">
-    <div class="table-card__header">
-      <div>
-        <h3 id="sports-table-title">Sports</h3>
-        <p>{{ meta().total }} total</p>
-      </div>
-      <label class="table-card__search">
-        <span class="visually-hidden">Search sports</span>
-        <span aria-hidden="true"></span>
-        <input type="search" placeholder="Search sports" (input)="updateSearch($any($event.target).value)" />
-      </label>
-    </div>
+    <h2 id="sports-table-title" class="visually-hidden">Sports</h2>
 
     @if (errorMessage() && !dialogOpen() && !deletingSport()) {
       <p class="catalogue__error" role="alert">{{ errorMessage() }}</p>
@@ -49,11 +26,11 @@
       <table>
         <thead>
           <tr>
-            <th>Sport</th>
-            <th>Governing bodies</th>
-            <th>Organisations</th>
-            <th>Participants</th>
-            <th><span class="visually-hidden">Actions</span></th>
+            <th><span class="table-card__column-heading">Sport <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Main Entities <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Competitions <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Participants <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -71,18 +48,19 @@
                     } @else {
                       <span class="sport-name__fallback">{{ sport.name.slice(0, 1) }}</span>
                     }
-                    <span>
-                      <a [routerLink]="['/sports', sport.id]">{{ sport.name }}</a>
-                      @if (sport.description) { <small>{{ sport.description }}</small> }
-                    </span>
+                    <a [routerLink]="['/sports', sport.id]">{{ sport.name }}</a>
                   </div>
                 </td>
                 <td>{{ sport.governingBodyCount }}</td>
                 <td>{{ sport.organizationCount }}</td>
                 <td>{{ sport.participantCount }}</td>
                 <td class="table-card__actions">
-                  <button type="button" (click)="openEditDialog(sport)" [attr.aria-label]="'Edit ' + sport.name" title="Edit sport">Edit</button>
-                  <button type="button" (click)="requestDelete(sport)" [attr.aria-label]="'Delete ' + sport.name" title="Delete sport">Delete</button>
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + sport.name" (clicked)="openEditDialog(sport)">
+                    <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
+                  </app-button>
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + sport.name" (clicked)="requestDelete(sport)">
+                    <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
+                  </app-button>
                 </td>
               </tr>
             } @empty {
@@ -111,10 +89,9 @@
     <section class="modal" role="dialog" aria-modal="true" [attr.aria-labelledby]="editingSport() ? 'edit-sport-title' : 'add-sport-title'">
       <div class="modal__header">
         <div>
-          <p class="catalogue__eyebrow">Sport</p>
           <h2 [id]="editingSport() ? 'edit-sport-title' : 'add-sport-title'">{{ editingSport() ? 'Edit Sport' : 'Add Sport' }}</h2>
         </div>
-        <button type="button" class="modal__close" (click)="closeDialog()" aria-label="Close dialog">×</button>
+        <button type="button" class="modal__close" (click)="closeDialog()" aria-label="Close dialog"></button>
       </div>
       <form [formGroup]="sportForm" (ngSubmit)="saveSport()" novalidate>
         <label>Name <input type="text" formControlName="name" maxlength="100" placeholder="e.g. Football" /></label>
@@ -125,7 +102,7 @@
         @if (errorMessage(); as error) { <p class="catalogue__error" role="alert">{{ error }}</p> }
         <div class="modal__actions">
           <button class="button button--ghost" type="button" (click)="closeDialog()">Cancel</button>
-          <button class="button button--primary" type="submit" [disabled]="isSaving()">{{ isSaving() ? 'Saving…' : editingSport() ? 'Save changes' : 'Add Sport' }}</button>
+          <button class="button button--primary" type="submit" [disabled]="sportForm.invalid || isSaving()">{{ isSaving() ? 'Saving…' : 'Save' }}</button>
         </div>
       </form>
     </section>
@@ -136,8 +113,10 @@
   <div class="modal-layer">
     <button class="modal-backdrop" type="button" (click)="cancelDelete()" aria-label="Cancel deletion"></button>
     <section class="modal modal--confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-sport-title">
-      <p class="catalogue__eyebrow">Confirm action</p>
-      <h2 id="delete-sport-title">Remove {{ sport.name }}?</h2>
+      <div class="modal__header">
+        <h2 id="delete-sport-title">Remove {{ sport.name }}?</h2>
+        <button type="button" class="modal__close" (click)="cancelDelete()" aria-label="Close dialog"></button>
+      </div>
       <p>This will soft delete the sport. It can no longer be used in the catalogue.</p>
       @if (errorMessage(); as error) { <p class="catalogue__error" role="alert">{{ error }}</p> }
       <div class="modal__actions">

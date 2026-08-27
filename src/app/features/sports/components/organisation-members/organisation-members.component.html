@@ -7,7 +7,13 @@
     <p class="members__error" role="alert">{{ errorMessage() }}</p>
   } @else {
     <section class="members__section">
-      <header><div><h4>Squad</h4><p>{{ squad().length }} members</p></div><button type="button" (click)="openSquadDialog()">+ Add Squad Member</button></header>
+      <header>
+        <div><h4>Squad</h4><p>{{ squad().length }} members</p></div>
+        <app-button variant="outline" size="small" (clicked)="openSquadDialog()">
+          <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+          Add Squad Member
+        </app-button>
+      </header>
       <div class="member-grid">
         @if (isLoading()) {
           @for (item of [1, 2]; track item) { <article class="member-card member-card--loading"></article> }
@@ -23,7 +29,13 @@
     </section>
 
     <section class="members__section">
-      <header><div><h4>Staff</h4><p>{{ staffCount() }} members</p></div><button type="button" (click)="openStaffDialog()">+ Add Staff Member</button></header>
+      <header>
+        <div><h4>Staff</h4><p>{{ staffCount() }} members</p></div>
+        <app-button variant="outline" size="small" (clicked)="openStaffDialog()">
+          <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+          Add Staff Member
+        </app-button>
+      </header>
       @if (isLoading()) {
         <div class="member-grid"><article class="member-card member-card--loading"></article><article class="member-card member-card--loading"></article></div>
       } @else {

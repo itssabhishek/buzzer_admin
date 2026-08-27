@@ -1,21 +1,10 @@
 <header class="header">
   <div class="header__title-group">
     <button class="header__menu" type="button" (click)="toggleMenu()" aria-label="Toggle sidebar">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
+      <img src="assets/svg/Icons=ic_kebab.svg" width="24" height="24" alt="" aria-hidden="true" />
     </button>
     <h1>{{ pageTitle() }}</h1>
   </div>
 
-  <label class="header__search">
-    <span class="header__search-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Search</span>
-    <input
-      type="search"
-      placeholder="Search"
-      [value]="searchTerm()"
-      (input)="updateSearch($any($event.target).value)"
-    />
-  </label>
+  <app-search-field class="header__search" [value]="searchTerm()" (valueChange)="updateSearch($event)" />
 </header>

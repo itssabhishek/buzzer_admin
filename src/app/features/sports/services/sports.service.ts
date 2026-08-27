@@ -49,8 +49,8 @@ export class SportsService {
     }).pipe(
       map(({ sports, governingBodies, organisations, participants }) => [
         { label: 'Sports', value: sports, icon: 'sports' },
-        { label: 'Governing bodies', value: governingBodies, icon: 'governing-bodies' },
-        { label: 'Organisations', value: organisations, icon: 'organisations' },
+        { label: 'Main entities', value: governingBodies, icon: 'governing-bodies' },
+        { label: 'Competitions', value: organisations, icon: 'organisations' },
         { label: 'Participants', value: participants, icon: 'participants' },
       ]),
     );
@@ -108,12 +108,36 @@ export class SportsService {
     return this.createChild<GoverningBody, GoverningBodyPayload>('governing-bodies', payload);
   }
 
+  updateGoverningBody(id: string, payload: GoverningBodyPayload): Observable<GoverningBody> {
+    return this.updateChild<GoverningBody, GoverningBodyPayload>('governing-bodies', id, payload);
+  }
+
+  softDeleteGoverningBody(id: string): Observable<void> {
+    return this.softDeleteChild('governing-bodies', id);
+  }
+
   createOrganisation(payload: OrganisationPayload): Observable<Organisation> {
     return this.createChild<Organisation, OrganisationPayload>('organizations', payload);
   }
 
+  updateOrganisation(id: string, payload: OrganisationPayload): Observable<Organisation> {
+    return this.updateChild<Organisation, OrganisationPayload>('organizations', id, payload);
+  }
+
+  softDeleteOrganisation(id: string): Observable<void> {
+    return this.softDeleteChild('organizations', id);
+  }
+
   createParticipant(payload: ParticipantPayload): Observable<Participant> {
     return this.createChild<Participant, ParticipantPayload>('players', payload);
+  }
+
+  updateParticipant(id: string, payload: ParticipantPayload): Observable<Participant> {
+    return this.updateChild<Participant, ParticipantPayload>('players', id, payload);
+  }
+
+  softDeleteParticipant(id: string): Observable<void> {
+    return this.softDeleteChild('players', id);
   }
 
   createTeam(payload: TeamPayload): Observable<Team> {
@@ -175,6 +199,18 @@ export class SportsService {
     return this.http
       .post<ApiResponse<T>>(`${this.organizationBaseUrl}/${resource}`, payload)
       .pipe(map((response) => response.data));
+  }
+
+  private updateChild<T, TPayload>(resource: string, id: string, payload: TPayload): Observable<T> {
+    return this.http
+      .patch<ApiResponse<T>>(`${this.organizationBaseUrl}/${resource}/${id}`, payload)
+      .pipe(map((response) => response.data));
+  }
+
+  private softDeleteChild(resource: string, id: string): Observable<void> {
+    return this.http
+      .delete<ApiResponse<void>>(`${this.organizationBaseUrl}/${resource}/${id}`)
+      .pipe(map(() => undefined));
   }
 
   private get organizationBaseUrl(): string {

@@ -61,17 +61,14 @@
   }
 
   &__brand-mark {
-    display: grid;
-    width: 27px;
-    height: 27px;
+    width: 100px;
+    height: 24px;
     flex: 0 0 auto;
-    place-items: center;
-    border-radius: 8px;
-    background: var(--yellow);
-    color: var(--background);
-    font-size: 25px;
-    font-weight: 900;
-    line-height: 1;
+  }
+
+  &__brand-mark--collapsed {
+    width: 24px;
+    height: 24px;
   }
 
   &__brand-copy {
@@ -104,17 +101,24 @@
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 26px;
-    line-height: 1;
-
     &:hover {
       background: var(--surface-hover);
-      color: var(--white);
     }
+
+    img {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+  }
+
+  &__collapse-icon--reversed {
+    transform: rotate(180deg);
   }
 
   &__nav {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 10px;
     padding: 24px 16px;
@@ -127,19 +131,31 @@
       min-height: 44px;
       padding: 10px 12px;
       border-radius: $radius-md;
-      color: var(--text-secondary);
+      color: var(--white);
       text-decoration: none;
 
-      transition: background 160ms ease, color 160ms ease;
+      transition:
+        background 160ms ease,
+        color 160ms ease;
 
       &:hover {
         background: var(--surface-hover);
-        color: var(--white);
+        color: var(--yellow);
+
+        .sidebar__item-icon {
+          filter: var(--sidebar-icon-active-filter);
+          opacity: 1;
+        }
       }
 
       &.active {
         background: var(--surface-raised);
-        color: var(--white);
+        color: var(--yellow);
+
+        .sidebar__item-icon {
+          filter: var(--sidebar-icon-active-filter);
+          opacity: 1;
+        }
       }
     }
   }
@@ -158,55 +174,19 @@
   }
 
   &__item-icon {
-    position: relative;
-    display: inline-block;
+    --sidebar-icon-active-filter: invert(44.93%) sepia(28.23%) saturate(3438.26%) hue-rotate(338.28deg) brightness(138.46%) contrast(183.08%);
+
     width: 20px;
     height: 20px;
     flex: 0 0 auto;
-    border: 1.6px solid currentcolor;
-    border-radius: 5px;
-
-    &[data-icon='dashboard']::before {
-      position: absolute;
-      inset: 4px;
-      border: 1.5px solid currentcolor;
-      border-radius: 2px;
-      content: '';
-    }
-
-    &[data-icon='trophy'] {
-      border-radius: 50% 50% 7px 7px;
-    }
-
-    &[data-icon='sports'] {
-      border-radius: 4px;
-    }
-
-    &[data-icon='send'] {
-      border-radius: 3px 12px 3px 3px;
-      transform: rotate(-35deg) scale(.82);
-    }
-
-    &[data-icon='wallet']::before {
-      position: absolute;
-      top: 6px;
-      right: 2px;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: currentcolor;
-      content: '';
-    }
-
-    &[data-icon='settings'] {
-      border-radius: 50%;
-    }
+    opacity: 1;
+    transition: opacity 160ms ease;
   }
 
   &__item-label {
     overflow: hidden;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -240,13 +220,37 @@
     color: var(--text-primary);
     font-size: 12px;
 
-    small {
+    > span {
       overflow: hidden;
-      margin-top: 2px;
-      color: var(--text-muted);
-      font-size: 11px;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+  }
+
+  &__sign-out {
+    width: fit-content;
+    margin-top: 2px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: left;
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--white);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--yellow);
+      outline-offset: 2px;
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
   }
 }

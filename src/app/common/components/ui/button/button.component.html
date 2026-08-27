@@ -1,0 +1,20 @@
+<button
+  class="app-button"
+  [class.app-button--primary]="variant() === 'primary'"
+  [class.app-button--outline]="variant() === 'outline'"
+  [class.app-button--ghost]="variant() === 'ghost'"
+  [class.app-button--danger]="variant() === 'danger'"
+  [class.app-button--default]="size() === 'default'"
+  [class.app-button--small]="size() === 'small'"
+  [class.app-button--icon]="size() === 'icon'"
+  [class.app-button--list]="size() === 'list'"
+  [class.app-button--badge]="size() === 'badge'"
+  [class.app-button--full]="fullWidth()"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-busy]="loading() || null"
+  [disabled]="disabled() || loading()"
+  [type]="type()"
+  (click)="onClick()"
+>
+  <ng-content />
+</button>

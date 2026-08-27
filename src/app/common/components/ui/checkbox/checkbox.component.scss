@@ -1,0 +1,42 @@
+.app-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ds-text);
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+
+  &__control {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    border: 1px solid var(--ds-text-muted);
+    border-radius: 4px;
+    background: var(--ds-surface);
+  }
+
+  &:focus-visible { outline: 2px solid var(--ds-primary); outline-offset: 3px; }
+  &:disabled { cursor: not-allowed; opacity: 0.48; }
+
+  &--checked .app-checkbox__control {
+    border-color: var(--yellow);
+    background: var(--yellow);
+
+    &::after {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      width: 5px;
+      height: 8px;
+      border: solid var(--ds-canvas);
+      border-width: 0 2px 2px 0;
+      content: '';
+      transform: rotate(45deg);
+    }
+  }
+}

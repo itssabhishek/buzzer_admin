@@ -1,0 +1,86 @@
+.ui-field {
+  display: grid;
+  gap: 6px;
+
+  &__label {
+    color: var(--ds-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  &__hint,
+  &__message {
+    color: var(--ds-text-muted);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  &__message--error {
+    color: #ff9aaa;
+  }
+}
+
+.ui-input,
+.ui-select,
+.ui-textarea {
+  --ui-control-focus: var(--yellow);
+  --ui-control-focus-ring: var(--focus-ring);
+  --ui-control-error: var(--ds-danger);
+  --ui-control-error-ring: rgba(236, 25, 60, 0.45);
+
+  width: 100%;
+  min-height: var(--ds-control-height);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-control);
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  font-size: 14px;
+  line-height: 20px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+
+  &::placeholder {
+    color: var(--ds-text-muted);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--ds-text-muted);
+  }
+
+  &:focus-visible {
+    border-color: var(--ui-control-focus);
+    outline: 0;
+    box-shadow: 0 0 0 3px var(--ui-control-focus-ring);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+}
+
+/* Angular adds .ng-submitted after a form submit. Do not show validation
+   styling merely because a field has been visited; a submitted invalid field
+   takes precedence over its normal focus treatment. */
+form.ng-submitted {
+  .ui-input.ng-invalid,
+  .ui-select.ng-invalid,
+  .ui-textarea.ng-invalid {
+    border-color: var(--ui-control-error);
+    box-shadow: 0 0 0 3px var(--ui-control-error-ring);
+  }
+}
+
+.ui-input,
+.ui-textarea {
+  padding: 10px 12px;
+}
+
+.ui-select {
+  padding: 0 36px 0 12px;
+}
+
+.ui-textarea {
+  min-height: 96px;
+  resize: vertical;
+}

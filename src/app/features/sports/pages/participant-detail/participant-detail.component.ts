@@ -106,7 +106,7 @@ export class ParticipantDetailComponent {
     const body = this.governingBody();
     const organisation = this.organisation();
     return [
-      { label: 'Sports', route: '/sports' },
+      { label: 'Sport', route: '/sports' },
       ...(sport ? [{ label: sport.name, route: `/sports/${sport.id}` }] : []),
       ...(sport && body ? [{ label: body.name, route: `/sports/${sport.id}/governing-bodies/${body.id}` }] : []),
       ...(sport && body && organisation ? [{ label: organisation.name, route: `/sports/${sport.id}/governing-bodies/${body.id}/organisations/${organisation.id}` }] : []),

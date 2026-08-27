@@ -1,8 +1,8 @@
 .stat-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--stat-card-columns, 3), minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 26px;
+  margin-bottom: 12px;
 }
 
 .stat-card {
@@ -17,10 +17,11 @@
   border-radius: 15px;
   background: var(--background);
 
-  strong { font-size: clamp(24px, 3vw, 36px); font-weight: 500; letter-spacing: -1px; }
-  > span:last-child { color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: 1.4px; text-align: center; text-transform: uppercase; }
+  strong { font-size: clamp(26px, 3vw, 38px); font-weight: 400; letter-spacing: -1px; }
+  > span:last-child { color: var(--text-muted); font-size: 10px; font-weight: 500; letter-spacing: 1.4px; text-align: center; text-transform: uppercase; }
 
   &__icon { width: 21px; height: 21px; border: 1.6px solid var(--text-secondary); border-radius: 50%; }
+  &__icon[data-icon='sports'] { border-radius: 5px; }
   &__icon[data-icon='governing-bodies'] { border-style: double; }
   &__icon[data-icon='organisations'], &__icon[data-icon='teams'] { border-radius: 3px; }
   &__icon[data-icon='participants'] { position: relative; width: 24px; border: 0; }
@@ -35,4 +36,5 @@
 
 @keyframes shimmer { to { transform: translateX(100%); } }
 
-@media (max-width: 680px) { .stat-cards { grid-template-columns: 1fr; } }
+@media (max-width: 880px) { .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .stat-cards { grid-template-columns: 1fr; } }

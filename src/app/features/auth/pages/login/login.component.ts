@@ -5,11 +5,12 @@ import { finalize } from 'rxjs';
 
 import { ApiErrorResponse } from '../../../../core/auth/models/auth.models';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { ButtonComponent, FieldComponent } from '../../../../common/components/ui';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ButtonComponent, FieldComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

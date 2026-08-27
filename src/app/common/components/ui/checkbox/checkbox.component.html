@@ -1,0 +1,13 @@
+<button
+  class="app-checkbox"
+  type="button"
+  role="checkbox"
+  [class.app-checkbox--checked]="checked()"
+  [attr.aria-checked]="checked()"
+  [attr.aria-label]="ariaLabel()"
+  [disabled]="disabled()"
+  (click)="toggle()"
+>
+  <span class="app-checkbox__control" aria-hidden="true"></span>
+  <span class="app-checkbox__label"><ng-content /></span>
+</button>

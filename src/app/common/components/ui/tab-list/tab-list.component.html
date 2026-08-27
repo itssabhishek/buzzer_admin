@@ -1,0 +1,14 @@
+<div class="app-tab-list" [class.app-tab-list--transparent]="variant() === 'transparent'" role="tablist">
+  @for (item of items(); track item.id) {
+    <button
+      type="button"
+      role="tab"
+      [class.app-tab-list__tab--active]="item.id === activeId()"
+      [attr.aria-selected]="item.id === activeId()"
+      [disabled]="item.disabled"
+      (click)="select(item)"
+    >
+      {{ item.label }}
+    </button>
+  }
+</div>

@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export interface HierarchyStat {
   label: string;
   value: number | string;
-  icon: 'governing-bodies' | 'organisations' | 'teams' | 'participants' | 'jersey' | 'position';
+  icon: 'sports' | 'governing-bodies' | 'organisations' | 'teams' | 'participants' | 'jersey' | 'position';
 }
 
 @Component({
@@ -18,6 +18,7 @@ export interface HierarchyStat {
 export class HierarchyStatCardsComponent {
   readonly stats = input.required<HierarchyStat[]>();
   readonly isLoading = input(false);
+  readonly columns = input<3 | 4>(3);
 
   isNumeric(value: number | string): boolean {
     return typeof value === 'number';
