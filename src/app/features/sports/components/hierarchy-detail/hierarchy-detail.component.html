@@ -59,6 +59,12 @@
         </div>
       }
     </div>
+    @if (hasChildSearch()) {
+    <div class="detail__table-controls">
+      <label class="visually-hidden" [for]="childTableTitle() + '-search'">Search {{ childTableTitle() }}</label>
+      <input class="ui-input" [id]="childTableTitle() + '-search'" type="search" [value]="childSearch()" [placeholder]="'Search ' + childTableTitle()" (input)="childSearchChanged.emit($any($event.target).value)" />
+    </div>
+    }
     <app-hierarchy-child-table
       [title]="childTableTitle()"
       [firstColumnLabel]="childTableFirstColumnLabel()"
@@ -72,5 +78,14 @@
       (editRequested)="childEditRequested.emit($event)"
       (deleteRequested)="childDeleteRequested.emit($event)"
     />
+    @if (childPagination(); as pagination) {
+      @if (pagination.totalPages > 1) {
+        <nav class="detail__pagination" [attr.aria-label]="childTableTitle() + ' pagination'">
+          <button type="button" [disabled]="pagination.page === 1" (click)="childPageChanged.emit(pagination.page - 1)">Previous</button>
+          <span>Page {{ pagination.page }} of {{ pagination.totalPages }}</span>
+          <button type="button" [disabled]="pagination.page === pagination.totalPages" (click)="childPageChanged.emit(pagination.page + 1)">Next</button>
+        </nav>
+      }
+    }
   }
 </section>

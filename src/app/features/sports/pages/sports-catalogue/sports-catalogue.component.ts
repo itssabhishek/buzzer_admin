@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -9,6 +9,7 @@ import { CatalogueStat, PaginationMeta, Sport, SportPayload } from '../../models
 import { SportsService } from '../../services/sports.service';
 import { ButtonComponent } from '../../../../common/components/ui';
 import { AppSearchService } from '../../../../core/search/app-search.service';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 import { HierarchyBreadcrumb, HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { HierarchyStatCardsComponent } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
 
@@ -29,6 +30,11 @@ export class SportsCatalogueComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly appSearch = inject(AppSearchService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageSports = this.authService.canManageSports;
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
+  readonly canImport = computed(() => this.canManageSports() || this.canManageHierarchy());
 
   readonly sports = signal<Sport[]>([]);
   readonly stats = signal<CatalogueStat[]>([]);

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin, of, switchMap, tap } from 'rxjs';
+import { finalize, switchMap, tap } from 'rxjs';
 
 import { HierarchyAddDialogComponent, HierarchyAddDialogField } from '../../components/hierarchy-add-dialog/hierarchy-add-dialog.component';
 import { HierarchyBreadcrumb } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
@@ -11,8 +11,9 @@ import { HierarchyChildTableColumn, HierarchyChildTableRow } from '../../compone
 import { HierarchyDetailComponent, HierarchyDetailMetadata } from '../../components/hierarchy-detail/hierarchy-detail.component';
 import { HierarchyStat } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
 import { ButtonComponent, DialogComponent } from '../../../../common/components/ui';
-import { GoverningBody, GoverningBodyPayload, Sport, SportPayload } from '../../models/sport.model';
+import { GoverningBody, GoverningBodyPayload, PaginationMeta, Sport, SportPayload } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-sport-detail',
@@ -22,14 +23,21 @@ import { SportsService } from '../../services/sports.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SportDetailComponent {
+  private readonly childPageSize = 10;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sportsService = inject(SportsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageSports = this.authService.canManageSports;
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
 
   readonly sport = signal<Sport | null>(null);
   readonly governingBodies = signal<GoverningBody[]>([]);
+  readonly governingBodyMeta = signal<PaginationMeta>({ page: 1, limit: this.childPageSize, total: 0, totalPages: 1 });
+  readonly governingBodySearch = signal('');
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly addDialogOpen = signal(false);
@@ -63,20 +71,14 @@ export class SportDetailComponent {
           this.isLoading.set(true);
           this.errorMessage.set(null);
         }),
-        switchMap((params) =>
-          this.sportsService.getSport(params.get('sportId') ?? '').pipe(
-            switchMap((sport) =>
-              forkJoin({ sport: of(sport), governingBodies: this.sportsService.listGoverningBodies(sport.id) }),
-            ),
-          ),
-        ),
+        switchMap((params) => this.sportsService.getSport(params.get('sportId') ?? '')),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ sport, governingBodies }) => {
+        next: (sport) => {
           this.sport.set(sport);
-          this.governingBodies.set(governingBodies);
-          this.isLoading.set(false);
+          this.governingBodySearch.set('');
+          this.loadGoverningBodies(1);
         },
         error: () => {
           this.isLoading.set(false);
@@ -90,11 +92,11 @@ export class SportDetailComponent {
   }
 
   stats(): HierarchyStat[] {
-    const governingBodies = this.governingBodies();
+    const sport = this.sport();
     return [
-      { label: 'Main entities', value: governingBodies.length, icon: 'governing-bodies' },
-      { label: 'Competitions', value: governingBodies.reduce((total, body) => total + body.organizationCount, 0), icon: 'organisations' },
-      { label: 'Participants', value: governingBodies.reduce((total, body) => total + body.participantCount, 0), icon: 'participants' },
+      { label: 'Governing Bodies', value: this.governingBodyMeta().total, icon: 'governing-bodies' },
+      { label: 'Organisations', value: sport?.organizationCount ?? 0, icon: 'organisations' },
+      { label: 'Participants', value: sport?.participantCount ?? 0, icon: 'participants' },
     ];
   }
 
@@ -121,6 +123,15 @@ export class SportDetailComponent {
       values: { competitions: body.organizationCount, participants: body.participantCount },
       route: sportId ? `/sports/${sportId}/governing-bodies/${body.id}` : undefined,
     }));
+  }
+
+  updateGoverningBodySearch(search: string): void {
+    this.governingBodySearch.set(search);
+    this.loadGoverningBodies(1);
+  }
+
+  changeGoverningBodyPage(page: number): void {
+    this.loadGoverningBodies(page);
   }
 
   openAddDialog(): void {
@@ -216,8 +227,8 @@ export class SportDetailComponent {
     this.isSavingGoverningBody.set(true);
     this.governingBodyEditErrorMessage.set(null);
     this.sportsService.updateGoverningBody(governingBody.id, payload).pipe(finalize(() => this.isSavingGoverningBody.set(false))).subscribe({
-      next: (updatedBody) => {
-        this.governingBodies.update((bodies) => bodies.map((body) => body.id === updatedBody.id ? { ...body, ...updatedBody } : body));
+      next: () => {
+        this.loadGoverningBodies(this.governingBodyMeta().page);
         this.governingBodyEditDialogOpen.set(false);
         this.editingGoverningBody.set(null);
       },
@@ -256,7 +267,7 @@ export class SportDetailComponent {
     request.pipe(finalize(() => this.isDeleting.set(false))).subscribe({
       next: () => {
         if (governingBody) {
-          this.governingBodies.update((bodies) => bodies.filter((body) => body.id !== governingBody.id));
+          this.loadGoverningBodies(this.governingBodyMeta().page);
           this.deletingGoverningBody.set(null);
         } else {
           this.deletingSport.set(false);
@@ -291,8 +302,8 @@ export class SportDetailComponent {
       .createGoverningBody({ name: name.trim(), ...(country.trim() ? { country: country.trim() } : {}), sportId: sport.id })
       .pipe(finalize(() => this.isAdding.set(false)))
       .subscribe({
-        next: (body) => {
-          this.governingBodies.update((bodies) => [...bodies, { ...body, organizationCount: 0, teamCount: 0, participantCount: 0 }]);
+        next: () => {
+          this.loadGoverningBodies(1);
           this.addDialogOpen.set(false);
         },
         error: (error: HttpErrorResponse) => this.addErrorMessage.set(error.error?.error?.message ?? 'Unable to add this governing body. Please try again.'),
@@ -300,7 +311,7 @@ export class SportDetailComponent {
   }
 
   readonly childColumns: HierarchyChildTableColumn[] = [
-    { key: 'competitions', label: 'Competitions' },
+    { key: 'competitions', label: 'Organisations' },
     { key: 'participants', label: 'Participants' },
   ];
   readonly addFields: HierarchyAddDialogField[] = [
@@ -312,6 +323,18 @@ export class SportDetailComponent {
     { controlName: 'description', label: 'Description', placeholder: 'A short description (optional)' },
     { controlName: 'iconUrl', label: 'Icon URL', placeholder: 'https://example.com/sport-icon.svg' },
   ];
+
+  private loadGoverningBodies(page: number): void {
+    const sport = this.sport();
+    if (!sport) return;
+    this.isLoading.set(true);
+    this.sportsService.searchGoverningBodies(sport.id, page, this.childPageSize, this.governingBodySearch())
+      .pipe(finalize(() => this.isLoading.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => { this.governingBodies.set(response.data); this.governingBodyMeta.set(response.meta); },
+        error: () => this.errorMessage.set('Unable to load governing bodies. Please try again.'),
+      });
+  }
 
   private formatDate(date: string | null | undefined): string {
     return date ? new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date)) : 'Not available';

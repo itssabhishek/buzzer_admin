@@ -26,7 +26,7 @@ export class SidebarComponent {
     const iconNames: Record<string, string> = {
       dashboard: 'ic_grid',
       trophy: 'ic_statistics',
-      sports: 'ic_buzz_active',
+      sports: 'ic_sport',
       send: 'ic_send',
       wallet: 'ic_wallet',
       settings: 'ic_settings',

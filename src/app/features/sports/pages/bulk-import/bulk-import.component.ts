@@ -5,6 +5,7 @@ import { ButtonComponent, FieldComponent } from '../../../../common/components/u
 import { HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { BulkImportEntityOption, BulkImportReport, BulkImportRow, ImportEntityType } from '../../models/bulk-import.model';
 import { BulkImportService } from '../../services/bulk-import.service';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 const ENTITY_OPTIONS: BulkImportEntityOption[] = [
   { value: 'sports', label: 'Sports', requiredFields: ['name'], optionalFields: ['description', 'iconUrl'] },
@@ -24,18 +25,31 @@ const ENTITY_OPTIONS: BulkImportEntityOption[] = [
 })
 export class BulkImportComponent {
   private readonly bulkImportService = inject(BulkImportService);
+  private readonly authService = inject(AuthService);
 
   readonly entityOptions = ENTITY_OPTIONS;
+  readonly canManageSports = this.authService.canManageSports;
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
+  readonly canImport = computed(() => this.canManageSports() || this.canManageHierarchy());
   readonly selectedEntityType = signal<ImportEntityType>('sports');
   readonly selectedFileName = signal<string | null>(null);
   readonly rows = signal<BulkImportRow[]>([]);
   readonly reports = signal<BulkImportReport[]>([]);
   readonly isImporting = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly selectedEntity = computed(() => ENTITY_OPTIONS.find((option) => option.value === this.selectedEntityType()) ?? ENTITY_OPTIONS[0]);
+  readonly availableEntityOptions = computed(() =>
+    ENTITY_OPTIONS.filter((option) => option.value === 'sports' ? this.canManageSports() : this.canManageHierarchy()),
+  );
+  readonly selectedEntity = computed(() => this.availableEntityOptions().find((option) => option.value === this.selectedEntityType()) ?? this.availableEntityOptions()[0]);
   readonly addedCount = computed(() => this.reports().filter((report) => report.status === 'added').length);
   readonly skippedCount = computed(() => this.reports().filter((report) => report.status === 'skipped').length);
   readonly failedCount = computed(() => this.reports().filter((report) => report.status === 'failed').length);
+
+  constructor() {
+    if (!this.canManageSports() && this.canManageHierarchy()) {
+      this.selectedEntityType.set('governing-bodies');
+    }
+  }
 
   selectEntityType(value: string): void {
     this.selectedEntityType.set(value as ImportEntityType);
@@ -43,6 +57,7 @@ export class BulkImportComponent {
   }
 
   async selectFile(file: File | undefined): Promise<void> {
+    if (!this.canImport()) return;
     this.clearFile();
     if (!file) {
       return;
@@ -66,7 +81,7 @@ export class BulkImportComponent {
   }
 
   async importRows(): Promise<void> {
-    if (!this.rows().length || this.isImporting()) {
+    if (!this.canImport() || !this.rows().length || this.isImporting()) {
       return;
     }
 

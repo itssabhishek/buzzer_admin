@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { HierarchyBreadcrumb, HierarchyBreadcrumbsComponent } from '../hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { HierarchyChildTableComponent, HierarchyChildTableColumn, HierarchyChildTableRow } from '../hierarchy-child-table/hierarchy-child-table.component';
 import { HierarchyStat, HierarchyStatCardsComponent } from '../hierarchy-stat-cards/hierarchy-stat-cards.component';
+import { PaginationMeta } from '../../models/sport.model';
 import { ButtonComponent } from '../../../../common/components/ui';
 
 export interface HierarchyDetailMetadata {
@@ -34,6 +35,9 @@ export class HierarchyDetailComponent {
   readonly childTableTotal = input.required<number>();
   readonly childTableColumns = input.required<HierarchyChildTableColumn[]>();
   readonly childTableRows = input.required<HierarchyChildTableRow[]>();
+  readonly hasChildSearch = input(false);
+  readonly childSearch = input('');
+  readonly childPagination = input<PaginationMeta | null>(null);
   readonly isLoading = input(false);
   readonly errorMessage = input<string | null>(null);
   readonly emptyMessage = input('There are no child records yet.');
@@ -47,4 +51,6 @@ export class HierarchyDetailComponent {
   readonly recordDeleteRequested = output<void>();
   readonly childEditRequested = output<HierarchyChildTableRow>();
   readonly childDeleteRequested = output<HierarchyChildTableRow>();
+  readonly childSearchChanged = output<string>();
+  readonly childPageChanged = output<number>();
 }

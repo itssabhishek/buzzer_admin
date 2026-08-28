@@ -15,6 +15,9 @@ export class AuthService {
 
   readonly user = computed(() => this.sessionState()?.user ?? null);
   readonly isAuthenticated = computed(() => this.sessionState() !== null);
+  readonly canManageSports = computed(() => this.hasRole('ADMIN', 'OPERATOR'));
+  readonly canManageOrganisationHierarchy = computed(() => this.hasRole('ADMIN', 'ORG'));
+  readonly canManageOrganisationMembers = computed(() => this.hasRole('ADMIN', 'ORG'));
 
   login(credentials: LoginCredentials): Observable<void> {
     return this.http
@@ -60,6 +63,11 @@ export class AuthService {
     if (session) {
       this.storeSession({ ...session, user });
     }
+  }
+
+  private hasRole(...roles: string[]): boolean {
+    const role = this.user()?.role.toUpperCase();
+    return !!role && roles.includes(role);
   }
 
   private readStoredSession(): AuthSession | null {

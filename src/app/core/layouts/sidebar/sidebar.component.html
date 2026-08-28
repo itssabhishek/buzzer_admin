@@ -29,10 +29,10 @@
       [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
     >
       <img
-        [class.sidebar__collapse-icon--reversed]="collapsed()"
-        src="assets/svg/Icons=ic_arrow_left.svg"
-        width="20"
-        height="20"
+        [class.sidebar__collapse-icon--reversed]="!collapsed()"
+        src="assets/svg/Icons=ic_right_clear.svg"
+        width="24"
+        height="24"
         alt=""
         aria-hidden="true"
       />

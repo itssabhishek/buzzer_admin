@@ -5,14 +5,19 @@
   [description]="team() ? 'Part of ' + team()?.name : null"
   [stats]="stats()"
   childTableTitle="Team Members"
-  [childTableTotal]="teammates().length"
+  [childTableTotal]="teamMemberTotal()"
   [childTableColumns]="childColumns"
   [childTableRows]="childRows()"
+  [hasChildSearch]="true"
+  [childSearch]="teammateSearch()"
+  [childPagination]="teammateMeta()"
   [isLoading]="isLoading()"
   [errorMessage]="errorMessage()"
   emptyMessage="This participant does not have any teammates yet."
-  addLabel="Participant"
+  [addLabel]="canManageHierarchy() ? 'Participant' : undefined"
   (addRequested)="openAddDialog()"
+  (childSearchChanged)="updateTeammateSearch($event)"
+  (childPageChanged)="changeTeammatePage($event)"
 />
 
 <app-hierarchy-add-dialog

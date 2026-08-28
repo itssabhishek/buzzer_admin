@@ -2,14 +2,18 @@
   <div class="catalogue__toolbar">
     <app-hierarchy-breadcrumbs [items]="breadcrumbItems" />
     <div class="catalogue__toolbar-actions">
+      @if (canImport()) {
       <app-button variant="outline" size="small" (clicked)="openBulkImport()">
         <img src="assets/svg/Icons=ic_documents.svg" width="16" height="16" alt="" aria-hidden="true" />
         Bulk Import
       </app-button>
+      }
+      @if (canManageSports()) {
       <app-button variant="outline" size="small" (clicked)="openCreateDialog()">
         <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
         Add Sport
       </app-button>
+      }
     </div>
   </div>
 
@@ -26,10 +30,10 @@
       <table>
         <thead>
           <tr>
-            <th><span class="table-card__column-heading">Sport <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Main Entities <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Competitions <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Participants <img src="assets/svg/Icons=ic_arrow_down.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Sport <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Governing Bodies <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Organisations <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th><span class="table-card__column-heading">Participants <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -55,12 +59,14 @@
                 <td>{{ sport.organizationCount }}</td>
                 <td>{{ sport.participantCount }}</td>
                 <td class="table-card__actions">
+                  @if (canManageSports()) {
                   <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + sport.name" (clicked)="openEditDialog(sport)">
                     <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
                   </app-button>
                   <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + sport.name" (clicked)="requestDelete(sport)">
                     <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
                   </app-button>
+                  }
                 </td>
               </tr>
             } @empty {

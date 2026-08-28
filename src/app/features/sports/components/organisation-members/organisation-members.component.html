@@ -9,10 +9,12 @@
     <section class="members__section">
       <header>
         <div><h4>Squad</h4><p>{{ squad().length }} members</p></div>
+        @if (canManageMembers()) {
         <app-button variant="outline" size="small" (clicked)="openSquadDialog()">
           <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
           Add Squad Member
         </app-button>
+        }
       </header>
       <div class="member-grid">
         @if (isLoading()) {
@@ -22,6 +24,12 @@
             <article class="member-card">
               @if (member.photoUrl) { <img [src]="member.photoUrl" [alt]="member.displayName" /> } @else { <span class="member-card__avatar">{{ initials(member.displayName) }}</span> }
               <div><strong>{{ member.displayName }}</strong><span>{{ member.position }}</span><small>{{ member.age === null ? 'Age unavailable' : member.age + ' years old' }}</small></div>
+              @if (canManageMembers()) {
+                <div class="member-card__actions">
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + member.displayName" (clicked)="openSquadEdit(member)"><img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" /></app-button>
+                  <app-button variant="ghost" size="icon" [ariaLabel]="'Remove ' + member.displayName" (clicked)="requestDelete('squad', member)"><img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" /></app-button>
+                </div>
+              }
             </article>
           } @empty { <p class="members__empty">No squad members yet.</p> }
         }
@@ -31,10 +39,12 @@
     <section class="members__section">
       <header>
         <div><h4>Staff</h4><p>{{ staffCount() }} members</p></div>
+        @if (canManageMembers()) {
         <app-button variant="outline" size="small" (clicked)="openStaffDialog()">
           <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
           Add Staff Member
         </app-button>
+        }
       </header>
       @if (isLoading()) {
         <div class="member-grid"><article class="member-card member-card--loading"></article><article class="member-card member-card--loading"></article></div>
@@ -45,6 +55,12 @@
               <article class="member-card">
                 @if (member.photoUrl) { <img [src]="member.photoUrl" [alt]="member.name" /> } @else { <span class="member-card__avatar">{{ initials(member.name) }}</span> }
                 <div><strong>{{ member.name }}</strong><span>{{ member.roleTitle }}</span><small>{{ member.nationality ?? 'Nationality unavailable' }}</small></div>
+                @if (canManageMembers()) {
+                  <div class="member-card__actions">
+                    <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + member.name" (clicked)="openStaffEdit(member)"><img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" /></app-button>
+                    <app-button variant="ghost" size="icon" [ariaLabel]="'Remove ' + member.name" (clicked)="requestDelete('staff', member)"><img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" /></app-button>
+                  </div>
+                }
               </article>
             }
           </div></div>
@@ -54,5 +70,15 @@
   }
 </section>
 
-<app-hierarchy-add-dialog [isOpen]="squadDialogOpen()" title="Add Squad Member" entityLabel="Squad Member" [form]="squadForm" [fields]="squadFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addSquadMember()" />
-<app-hierarchy-add-dialog [isOpen]="staffDialogOpen()" title="Add Staff Member" entityLabel="Staff Member" [form]="staffForm" [fields]="staffFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addStaffMember()" />
+<app-hierarchy-add-dialog [isOpen]="squadDialogOpen()" [mode]="editingSquadMember() ? 'edit' : 'add'" [title]="editingSquadMember() ? 'Edit Squad Member' : 'Add Squad Member'" entityLabel="Squad Member" [form]="squadForm" [fields]="squadFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addSquadMember()" />
+<app-hierarchy-add-dialog [isOpen]="staffDialogOpen()" [mode]="editingStaffMember() ? 'edit' : 'add'" [title]="editingStaffMember() ? 'Edit Staff Member' : 'Add Staff Member'" entityLabel="Staff Member" [form]="staffForm" [fields]="staffFields" [isSaving]="isSaving()" [errorMessage]="dialogErrorMessage()" (closed)="closeDialogs()" (submitted)="addStaffMember()" />
+
+@if (deletingMember(); as target) {
+  <app-dialog [open]="true" size="compact" [title]="'Remove ' + (target.type === 'squad' ? target.member.displayName : target.member.name) + '?'" description="This member will be removed from the organisation." [statusIcon]="null" (closed)="cancelDelete()">
+    @if (deleteErrorMessage(); as error) { <p role="alert">{{ error }}</p> }
+    <div dialogActions>
+      <app-button variant="outline" type="button" [disabled]="isDeleting()" (clicked)="cancelDelete()">Cancel</app-button>
+      <app-button variant="danger" type="button" [loading]="isDeleting()" (clicked)="deleteMember()">Remove</app-button>
+    </div>
+  </app-dialog>
+}

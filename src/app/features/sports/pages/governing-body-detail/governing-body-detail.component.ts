@@ -10,9 +10,10 @@ import { HierarchyBreadcrumb } from '../../components/hierarchy-breadcrumbs/hier
 import { HierarchyChildTableColumn, HierarchyChildTableRow } from '../../components/hierarchy-child-table/hierarchy-child-table.component';
 import { HierarchyDetailComponent, HierarchyDetailMetadata } from '../../components/hierarchy-detail/hierarchy-detail.component';
 import { HierarchyStat } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
-import { GoverningBody, GoverningBodyPayload, Organisation, OrganisationPayload, Sport } from '../../models/sport.model';
+import { GoverningBody, GoverningBodyPayload, Organisation, OrganisationPayload, PaginationMeta, Sport } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
 import { ButtonComponent, DialogComponent } from '../../../../common/components/ui';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-governing-body-detail',
@@ -22,15 +23,21 @@ import { ButtonComponent, DialogComponent } from '../../../../common/components/
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoverningBodyDetailComponent {
+  private readonly childPageSize = 10;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sportsService = inject(SportsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
 
   readonly sport = signal<Sport | null>(null);
   readonly governingBody = signal<GoverningBody | null>(null);
   readonly organisations = signal<Organisation[]>([]);
+  readonly organisationMeta = signal<PaginationMeta>({ page: 1, limit: this.childPageSize, total: 0, totalPages: 1 });
+  readonly organisationSearch = signal('');
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly addDialogOpen = signal(false);
@@ -67,7 +74,7 @@ export class GoverningBodyDetailComponent {
               forkJoin({
                 governingBody: of(governingBody),
                 sport: this.sportsService.getSport(governingBody.sportId),
-                organisations: this.sportsService.listOrganisations(governingBody.id),
+                organisations: this.sportsService.searchOrganisations(governingBody.id, 1, this.childPageSize),
               }),
             ),
           ),
@@ -78,7 +85,8 @@ export class GoverningBodyDetailComponent {
         next: ({ governingBody, sport, organisations }) => {
           this.governingBody.set(governingBody);
           this.sport.set(sport);
-          this.organisations.set(organisations);
+          this.organisations.set(organisations.data);
+          this.organisationMeta.set(organisations.meta);
           this.isLoading.set(false);
         },
         error: () => {
@@ -98,11 +106,11 @@ export class GoverningBodyDetailComponent {
   }
 
   stats(): HierarchyStat[] {
-    const organisations = this.organisations();
+    const governingBody = this.governingBody();
     return [
-      { label: 'Organisations', value: organisations.length, icon: 'organisations' },
-      { label: 'Teams', value: organisations.reduce((total, organisation) => total + organisation.teamCount, 0), icon: 'teams' },
-      { label: 'Participants', value: organisations.reduce((total, organisation) => total + organisation.participantCount, 0), icon: 'participants' },
+      { label: 'Organisations', value: this.organisationMeta().total, icon: 'organisations' },
+      { label: 'Teams', value: governingBody?.teamCount ?? 0, icon: 'teams' },
+      { label: 'Participants', value: governingBody?.participantCount ?? 0, icon: 'participants' },
     ];
   }
 
@@ -128,6 +136,15 @@ export class GoverningBodyDetailComponent {
       values: { city: organisation.city, teams: organisation.teamCount, participants: organisation.participantCount },
       route: sportId && governingBodyId ? `/sports/${sportId}/governing-bodies/${governingBodyId}/organisations/${organisation.id}` : undefined,
     }));
+  }
+
+  updateOrganisationSearch(search: string): void {
+    this.organisationSearch.set(search);
+    this.loadOrganisations(1);
+  }
+
+  changeOrganisationPage(page: number): void {
+    this.loadOrganisations(page);
   }
 
   openAddDialog(): void {
@@ -188,7 +205,7 @@ export class GoverningBodyDetailComponent {
     this.isSavingEdit.set(true);
     this.editErrorMessage.set(null);
     this.sportsService.updateOrganisation(organisation.id, payload).pipe(finalize(() => this.isSavingEdit.set(false))).subscribe({
-      next: (updated) => { this.organisations.update((items) => items.map((item) => item.id === updated.id ? { ...item, ...updated } : item)); this.closeEditDialogs(); },
+      next: () => { this.loadOrganisations(this.organisationMeta().page); this.closeEditDialogs(); },
       error: (error: HttpErrorResponse) => this.editErrorMessage.set(error.error?.error?.message ?? 'Unable to update this organisation. Please try again.'),
     });
   }
@@ -212,7 +229,7 @@ export class GoverningBodyDetailComponent {
     const request = organisation ? this.sportsService.softDeleteOrganisation(organisation.id) : this.sportsService.softDeleteGoverningBody(body!.id);
     request.pipe(finalize(() => this.isDeleting.set(false))).subscribe({
       next: () => {
-        if (organisation) { this.organisations.update((items) => items.filter((item) => item.id !== organisation.id)); this.deletingOrganisation.set(null); }
+        if (organisation) { this.loadOrganisations(this.organisationMeta().page); this.deletingOrganisation.set(null); }
         else { this.deletingGoverningBody.set(false); void this.router.navigate(['/sports', body!.sportId]); }
       },
       error: (error: HttpErrorResponse) => this.deleteErrorMessage.set(error.error?.error?.message ?? 'Unable to delete this record. Please try again.'),
@@ -241,8 +258,8 @@ export class GoverningBodyDetailComponent {
       .createOrganisation({ name: name.trim(), ...(city.trim() ? { city: city.trim() } : {}), governingBodyId: governingBody.id })
       .pipe(finalize(() => this.isAdding.set(false)))
       .subscribe({
-        next: (organisation) => {
-          this.organisations.update((organisations) => [...organisations, { ...organisation, teamCount: 0, participantCount: 0, squadCount: 0, staffCount: 0 }]);
+        next: () => {
+          this.loadOrganisations(1);
           this.addDialogOpen.set(false);
         },
         error: (error: HttpErrorResponse) => this.addErrorMessage.set(error.error?.error?.message ?? 'Unable to add this organisation. Please try again.'),
@@ -262,6 +279,18 @@ export class GoverningBodyDetailComponent {
     { controlName: 'name', label: 'Name', placeholder: 'e.g. UEFA' },
     { controlName: 'country', label: 'Country', placeholder: 'e.g. Switzerland' },
   ];
+
+  private loadOrganisations(page: number): void {
+    const governingBody = this.governingBody();
+    if (!governingBody) return;
+    this.isLoading.set(true);
+    this.sportsService.searchOrganisations(governingBody.id, page, this.childPageSize, this.organisationSearch())
+      .pipe(finalize(() => this.isLoading.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => { this.organisations.set(response.data); this.organisationMeta.set(response.meta); },
+        error: () => this.errorMessage.set('Unable to load organisations. Please try again.'),
+      });
+  }
 
   private formatDate(date: string | null | undefined): string {
     return date ? new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date)) : 'Not available';

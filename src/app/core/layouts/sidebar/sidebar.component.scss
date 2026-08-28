@@ -106,8 +106,8 @@
     }
 
     img {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       opacity: 0.7;
     }
   }
@@ -174,7 +174,8 @@
   }
 
   &__item-icon {
-    --sidebar-icon-active-filter: invert(44.93%) sepia(28.23%) saturate(3438.26%) hue-rotate(338.28deg) brightness(138.46%) contrast(183.08%);
+    --sidebar-icon-active-filter: invert(44.93%) sepia(28.23%) saturate(3438.26%)
+      hue-rotate(338.28deg) brightness(138.46%) contrast(183.08%);
 
     width: 20px;
     height: 20px;

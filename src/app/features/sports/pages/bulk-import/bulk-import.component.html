@@ -12,6 +12,7 @@
     <p>Upload a CSV or JSON file to add multiple records at once.</p>
   </section>
 
+  @if (canImport()) {
   <section class="import-card" aria-labelledby="import-setup-title">
     <div class="import-card__heading">
       <div>
@@ -24,7 +25,7 @@
       <div class="import-card__details">
         <app-field label="Import records">
           <select class="ui-select" id="import-entity" [value]="selectedEntityType()" (change)="selectEntityType($any($event.target).value)" [disabled]="isImporting()">
-            @for (option of entityOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+            @for (option of availableEntityOptions(); track option.value) { <option [value]="option.value">{{ option.label }}</option> }
           </select>
         </app-field>
 
@@ -57,6 +58,9 @@
       </app-button>
     </div>
   </section>
+  } @else {
+    <p class="bulk-import__error" role="alert">Your account does not have permission to import sports data.</p>
+  }
 
   @if (reports().length) {
     <section class="report-card" aria-live="polite">

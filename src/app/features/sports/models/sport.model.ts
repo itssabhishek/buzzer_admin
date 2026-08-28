@@ -130,6 +130,13 @@ export interface SquadMember {
   age: number | null;
 }
 
+export interface AthleteProfile {
+  userId: string;
+  displayName: string;
+  photoUrl: string | null;
+  age: number | null;
+}
+
 export interface StaffMember {
   id: string;
   organizationId: string;
@@ -156,6 +163,8 @@ export interface SquadMemberPayload {
   agreementEnd?: string;
 }
 
+export type SquadMemberUpdatePayload = Partial<Pick<SquadMemberPayload, 'position' | 'agreementEnd'>>;
+
 export interface StaffMemberPayload {
   name: string;
   roleTitle: string;
@@ -163,3 +172,5 @@ export interface StaffMemberPayload {
   nationality?: string;
   photoUrl?: string;
 }
+
+export type StaffMemberUpdatePayload = Partial<StaffMemberPayload>;

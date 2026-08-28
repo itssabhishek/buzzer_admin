@@ -10,8 +10,9 @@ import { HierarchyBreadcrumb } from '../../components/hierarchy-breadcrumbs/hier
 import { HierarchyChildTableColumn, HierarchyChildTableRow } from '../../components/hierarchy-child-table/hierarchy-child-table.component';
 import { HierarchyDetailComponent } from '../../components/hierarchy-detail/hierarchy-detail.component';
 import { HierarchyStat } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
-import { GoverningBody, Organisation, Participant, Sport, Team } from '../../models/sport.model';
+import { GoverningBody, Organisation, PaginationMeta, Participant, Sport, Team } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-participant-detail',
@@ -21,10 +22,14 @@ import { SportsService } from '../../services/sports.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ParticipantDetailComponent {
+  private readonly childPageSize = 10;
   private readonly route = inject(ActivatedRoute);
   private readonly sportsService = inject(SportsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
 
   readonly sport = signal<Sport | null>(null);
   readonly governingBody = signal<GoverningBody | null>(null);
@@ -32,6 +37,8 @@ export class ParticipantDetailComponent {
   readonly team = signal<Team | null>(null);
   readonly participant = signal<Participant | null>(null);
   readonly teammates = signal<Participant[]>([]);
+  readonly teammateMeta = signal<PaginationMeta>({ page: 1, limit: this.childPageSize, total: 0, totalPages: 1 });
+  readonly teammateSearch = signal('');
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly addDialogOpen = signal(false);
@@ -66,7 +73,7 @@ export class ParticipantDetailComponent {
                             organisation: of(organisation),
                             governingBody: of(governingBody),
                             sport: this.sportsService.getSport(governingBody.sportId),
-                            participants: this.sportsService.listParticipants(team.id),
+                            participants: this.sportsService.searchParticipants(team.id, 1, this.childPageSize),
                           }),
                         ),
                       ),
@@ -86,7 +93,8 @@ export class ParticipantDetailComponent {
           this.organisation.set(organisation);
           this.governingBody.set(governingBody);
           this.sport.set(sport);
-          this.teammates.set(participants.filter((member) => member.id !== participant.id));
+          this.teammates.set(participants.data.filter((member) => member.id !== participant.id));
+          this.teammateMeta.set(participants.meta);
           this.isLoading.set(false);
         },
         error: () => {
@@ -136,6 +144,19 @@ export class ParticipantDetailComponent {
     }));
   }
 
+  updateTeammateSearch(search: string): void {
+    this.teammateSearch.set(search);
+    this.loadTeammates(1);
+  }
+
+  changeTeammatePage(page: number): void {
+    this.loadTeammates(page);
+  }
+
+  teamMemberTotal(): number {
+    return Math.max(0, this.teammateMeta().total - 1);
+  }
+
   openAddDialog(): void {
     this.participantForm.reset({ firstName: '', lastName: '', jerseyNumber: '', position: '' });
     this.addErrorMessage.set(null);
@@ -168,8 +189,8 @@ export class ParticipantDetailComponent {
       })
       .pipe(finalize(() => this.isAdding.set(false)))
       .subscribe({
-        next: (participant) => {
-          this.teammates.update((teammates) => [...teammates, { ...participant, team }]);
+        next: () => {
+          this.loadTeammates(1);
           this.addDialogOpen.set(false);
         },
         error: (error: HttpErrorResponse) => this.addErrorMessage.set(error.error?.error?.message ?? 'Unable to add this participant. Please try again.'),
@@ -186,4 +207,20 @@ export class ParticipantDetailComponent {
     { controlName: 'jerseyNumber', label: 'Jersey number', type: 'number', placeholder: 'e.g. 10' },
     { controlName: 'position', label: 'Position', placeholder: 'e.g. Forward' },
   ];
+
+  private loadTeammates(page: number): void {
+    const team = this.team();
+    if (!team) return;
+    this.isLoading.set(true);
+    this.sportsService.searchParticipants(team.id, page, this.childPageSize, this.teammateSearch())
+      .pipe(finalize(() => this.isLoading.set(false)), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const participantId = this.participant()?.id;
+          this.teammates.set(response.data.filter((member) => member.id !== participantId));
+          this.teammateMeta.set(response.meta);
+        },
+        error: () => this.errorMessage.set('Unable to load team members. Please try again.'),
+      });
+  }
 }

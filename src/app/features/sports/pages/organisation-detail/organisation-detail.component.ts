@@ -14,6 +14,7 @@ import { HierarchyStat } from '../../components/hierarchy-stat-cards/hierarchy-s
 import { GoverningBody, Organisation, OrganisationPayload, Participant, ParticipantPayload, Sport, Team } from '../../models/sport.model';
 import { SportsService } from '../../services/sports.service';
 import { ButtonComponent, DialogComponent } from '../../../../common/components/ui';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-organisation-detail',
@@ -28,6 +29,9 @@ export class OrganisationDetailComponent {
   private readonly sportsService = inject(SportsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+
+  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
 
   readonly sport = signal<Sport | null>(null);
   readonly governingBody = signal<GoverningBody | null>(null);

@@ -23,6 +23,7 @@ export class LoginComponent {
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly emailLoginOpen = signal(false);
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
@@ -46,6 +47,18 @@ export class LoginComponent {
           this.errorMessage.set(error.error?.error?.message ?? 'Unable to sign in. Please try again.');
         },
       });
+  }
+
+  openEmailLogin(): void {
+    this.errorMessage.set(null);
+    this.emailLoginOpen.set(true);
+  }
+
+  returnToLoginOptions(): void {
+    if (!this.isSubmitting()) {
+      this.errorMessage.set(null);
+      this.emailLoginOpen.set(false);
+    }
   }
 
   private returnUrl(): string {

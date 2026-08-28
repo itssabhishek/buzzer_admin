@@ -1,61 +1,81 @@
 <main class="login-page">
-  <section class="login-card" aria-labelledby="login-title">
+  <section class="login-card" [class.login-card--email]="emailLoginOpen()" aria-labelledby="login-title">
+    @if (emailLoginOpen()) {
+      <button class="login-card__back" type="button" (click)="returnToLoginOptions()" aria-label="Back to sign-in options">
+        <img src="assets/svg/Icons=ic_arrow_left.svg" width="28" height="28" alt="" aria-hidden="true" />
+      </button>
+    }
+
     <div class="login-card__brand" aria-label="Buzzer Admin Console">
       <img
         class="login-card__brand-mark"
         src="assets/images/buzzer_admin_console.png"
-        width="140"
-        height="34"
+        width="210"
+        height="51"
         alt="Buzzer Admin Console"
         aria-hidden="true"
       />
     </div>
 
-    <h1 id="login-title" class="visually-hidden">Sign in to your account</h1>
+    <h1 id="login-title" class="visually-hidden">Sign in to Buzzer Admin Console</h1>
 
-    <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
-      <app-field
-        label="Email Address*"
-        [error]="
-          loginForm.controls.email.touched && loginForm.controls.email.invalid
-            ? 'Enter a valid email address.'
-            : null
-        "
-      >
-        <input
-          class="ui-input"
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          placeholder="Email Address*"
-        />
-      </app-field>
+    @if (!emailLoginOpen()) {
+      <div class="login-card__options">
+        <app-button type="button" variant="primary" [fullWidth]="true" (clicked)="openEmailLogin()">Log in with email</app-button>
+        <button class="login-card__provider" type="button">
+          <img src="assets/svg/Icons=ic_google.svg" width="32" height="32" alt="" aria-hidden="true" />
+          Continue with Google
+        </button>
+        <button class="login-card__provider" type="button">
+          <img src="assets/svg/Icons=ic_apple.svg" width="32" height="32" alt="" aria-hidden="true" />
+          Continue with Apple
+        </button>
+      </div>
+    } @else {
+      <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+        <app-field
+          label="Email Address*"
+          [error]="
+            loginForm.controls.email.touched && loginForm.controls.email.invalid
+              ? 'Enter a valid email address.'
+              : null
+          "
+        >
+          <input
+            class="ui-input"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="Email Address*"
+          />
+        </app-field>
 
-      <app-field
-        label="Password"
-        hint="Use all caps, numbers and symbols"
-        [error]="
-          loginForm.controls.password.touched && loginForm.controls.password.invalid
-            ? 'Enter your password.'
-            : null
-        "
-      >
-        <input
-          class="ui-input"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          placeholder="Password"
-        />
-      </app-field>
+        <app-field
+          label="Password"
+          hint="Use all caps, numbers and symbols"
+          [error]="
+            loginForm.controls.password.touched && loginForm.controls.password.invalid
+              ? 'Enter your password.'
+              : null
+          "
+        >
+          <input
+            class="ui-input"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Password"
+          />
+        </app-field>
 
-      @if (errorMessage(); as error) {
-        <p class="login-card__error" role="alert">{{ error }}</p>
-      }
+        @if (errorMessage(); as error) {
+          <p class="login-card__error" role="alert">{{ error }}</p>
+        }
 
-      <app-button type="submit" variant="danger" [fullWidth]="true" [loading]="isSubmitting()">
-        {{ isSubmitting() ? 'Signing in…' : 'Login' }}
-      </app-button>
-    </form>
+        <app-button type="submit" variant="danger" [fullWidth]="true" [loading]="isSubmitting()">
+          {{ isSubmitting() ? 'Signing in…' : 'Login' }}
+        </app-button>
+      </form>
+    }
   </section>
 </main>

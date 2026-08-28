@@ -23,6 +23,11 @@
   &__table-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 12px 0 6px; }
   &__table-heading h3 { font-size: 14px; font-weight: 500; }
   &__add-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+  &__table-controls { margin: 0 0 8px; }
+  &__table-controls input { width: min(100%, 340px); }
+  &__pagination { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 12px 0; color: var(--text-secondary); font-size: 12px; }
+  &__pagination button { min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--white); cursor: pointer; }
+  &__pagination button:disabled { cursor: not-allowed; opacity: .5; }
 }
 
 @media (max-width: 760px) {
