@@ -1,1 +1,14 @@
+@if (authService.authorizationError(); as error) {
+  <section class="authorization-notice" role="alert" aria-live="assertive">
+    <p>{{ error }}</p>
+    <button
+      type="button"
+      aria-label="Dismiss permission message"
+      (click)="authService.clearAuthorizationError()"
+    >
+      Dismiss
+    </button>
+  </section>
+}
+
 <router-outlet />

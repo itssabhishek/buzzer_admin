@@ -1,2 +1,32 @@
-/* Intentionally empty.
-   Global styles will be added later. */
+.authorization-notice {
+  align-items: center;
+  background: var(--color-error-background, #fff1f0);
+  border: 1px solid var(--color-error, #d92d20);
+  border-radius: 0.5rem;
+  color: var(--color-error-text, #7a271a);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  left: 1rem;
+  max-width: 32rem;
+  padding: 0.75rem 1rem;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 1000;
+
+  p {
+    margin: 0;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 0.25rem;
+    text-decoration: underline;
+  }
+}
