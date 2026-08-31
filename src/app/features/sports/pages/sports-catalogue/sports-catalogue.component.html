@@ -3,45 +3,103 @@
     <app-hierarchy-breadcrumbs [items]="breadcrumbItems" />
     <div class="catalogue__toolbar-actions">
       @if (canImport()) {
-      <app-button variant="outline" size="small" (clicked)="openBulkImport()">
-        <img src="assets/svg/Icons=ic_documents.svg" width="16" height="16" alt="" aria-hidden="true" />
-        Bulk Import
-      </app-button>
+        <app-button variant="outline" size="small" (clicked)="openBulkImport()">
+          <img
+            src="assets/svg/Icons=ic_documents.svg"
+            width="16"
+            height="16"
+            alt=""
+            aria-hidden="true"
+          />
+          Bulk Import
+        </app-button>
       }
       @if (canManageSports()) {
-      <app-button variant="outline" size="small" (clicked)="openCreateDialog()">
-        <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
-        Add Sport
-      </app-button>
+        <app-button variant="outline" size="small" (clicked)="openCreateDialog()">
+          <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+          Add Sport
+        </app-button>
       }
     </div>
   </div>
 
-  <app-hierarchy-stat-cards class="catalogue__stats" [stats]="stats()" [isLoading]="isLoading()" [columns]="4" />
+  <app-hierarchy-stat-cards
+    class="catalogue__stats"
+    [stats]="stats()"
+    [isLoading]="isStatsLoading()"
+    [columns]="4"
+  />
+  @if (statsErrorMessage(); as error) {
+    <p class="catalogue__error" role="alert">{{ error }}</p>
+  }
 
   <section class="table-card" aria-labelledby="sports-table-title">
     <h2 id="sports-table-title" class="visually-hidden">Sports</h2>
-
-    @if (errorMessage() && !dialogOpen() && !deletingSport()) {
-      <p class="catalogue__error" role="alert">{{ errorMessage() }}</p>
-    }
 
     <div class="table-card__scroll">
       <table>
         <thead>
           <tr>
-            <th><span class="table-card__column-heading">Sport <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Governing Bodies <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Organisations <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
-            <th><span class="table-card__column-heading">Participants <img src="assets/svg/Icons=ic_list_switch.svg" width="12" height="12" alt="" aria-hidden="true" /></span></th>
+            <th>
+              <span class="table-card__column-heading"
+                >Sport
+                <img
+                  src="assets/svg/Icons=ic_list_switch.svg"
+                  width="12"
+                  height="12"
+                  alt=""
+                  aria-hidden="true"
+              /></span>
+            </th>
+            <th>
+              <span class="table-card__column-heading"
+                >Governing Bodies
+                <img
+                  src="assets/svg/Icons=ic_list_switch.svg"
+                  width="12"
+                  height="12"
+                  alt=""
+                  aria-hidden="true"
+              /></span>
+            </th>
+            <th>
+              <span class="table-card__column-heading"
+                >Organisations
+                <img
+                  src="assets/svg/Icons=ic_list_switch.svg"
+                  width="12"
+                  height="12"
+                  alt=""
+                  aria-hidden="true"
+              /></span>
+            </th>
+            <th>
+              <span class="table-card__column-heading"
+                >Participants
+                <img
+                  src="assets/svg/Icons=ic_list_switch.svg"
+                  width="12"
+                  height="12"
+                  alt=""
+                  aria-hidden="true"
+              /></span>
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (isLoading()) {
             @for (item of [1, 2, 3, 4, 5]; track item) {
-              <tr class="table-card__loading-row"><td colspan="5"><span></span></td></tr>
+              <tr class="table-card__loading-row">
+                <td colspan="5"><span></span></td>
+              </tr>
             }
+          } @else if (tableErrorMessage(); as error) {
+            <tr>
+              <td class="table-card__empty" colspan="5">
+                <p class="catalogue__error" role="alert">{{ error }}</p>
+              </td>
+            </tr>
           } @else {
             @for (sport of sports(); track sport.id) {
               <tr>
@@ -60,17 +118,41 @@
                 <td>{{ sport.participantCount }}</td>
                 <td class="table-card__actions">
                   @if (canManageSports()) {
-                  <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + sport.name" (clicked)="openEditDialog(sport)">
-                    <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
-                  </app-button>
-                  <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + sport.name" (clicked)="requestDelete(sport)">
-                    <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
-                  </app-button>
+                    <app-button
+                      variant="ghost"
+                      size="icon"
+                      [ariaLabel]="'Edit ' + sport.name"
+                      (clicked)="openEditDialog(sport)"
+                    >
+                      <img
+                        src="assets/svg/Icons=ic_edit.svg"
+                        width="16"
+                        height="16"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </app-button>
+                    <app-button
+                      variant="ghost"
+                      size="icon"
+                      [ariaLabel]="'Delete ' + sport.name"
+                      (clicked)="requestDelete(sport)"
+                    >
+                      <img
+                        src="assets/svg/Icons=ic_delete.svg"
+                        width="16"
+                        height="16"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </app-button>
                   }
                 </td>
               </tr>
             } @empty {
-              <tr><td class="table-card__empty" colspan="5">No sports match your search.</td></tr>
+              <tr>
+                <td class="table-card__empty" colspan="5">{{ emptyStateMessage() }}</td>
+              </tr>
             }
           }
         </tbody>
@@ -79,11 +161,21 @@
 
     @if (meta().totalPages > 1) {
       <nav class="pagination" aria-label="Sports pagination">
-        <button type="button" [disabled]="meta().page === 1" (click)="changePage(meta().page - 1)">Previous</button>
+        <button type="button" [disabled]="meta().page === 1" (click)="changePage(meta().page - 1)">
+          Previous
+        </button>
         @for (page of pageNumbers(); track page) {
-          <button type="button" [class.is-active]="page === meta().page" (click)="changePage(page)">{{ page }}</button>
+          <button type="button" [class.is-active]="page === meta().page" (click)="changePage(page)">
+            {{ page }}
+          </button>
         }
-        <button type="button" [disabled]="meta().page === meta().totalPages" (click)="changePage(meta().page + 1)">Next</button>
+        <button
+          type="button"
+          [disabled]="meta().page === meta().totalPages"
+          (click)="changePage(meta().page + 1)"
+        >
+          Next
+        </button>
       </nav>
     }
   </section>
@@ -91,24 +183,72 @@
 
 @if (dialogOpen()) {
   <div class="modal-layer">
-    <button class="modal-backdrop" type="button" (click)="closeDialog()" aria-label="Close dialog"></button>
-    <section class="modal" role="dialog" aria-modal="true" [attr.aria-labelledby]="editingSport() ? 'edit-sport-title' : 'add-sport-title'">
+    <button
+      class="modal-backdrop"
+      type="button"
+      (click)="closeDialog()"
+      aria-label="Close dialog"
+    ></button>
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="editingSport() ? 'edit-sport-title' : 'add-sport-title'"
+    >
       <div class="modal__header">
         <div>
-          <h2 [id]="editingSport() ? 'edit-sport-title' : 'add-sport-title'">{{ editingSport() ? 'Edit Sport' : 'Add Sport' }}</h2>
+          <h2 [id]="editingSport() ? 'edit-sport-title' : 'add-sport-title'">
+            {{ editingSport() ? 'Edit Sport' : 'Add Sport' }}
+          </h2>
         </div>
-        <button type="button" class="modal__close" (click)="closeDialog()" aria-label="Close dialog"></button>
+        <button
+          type="button"
+          class="modal__close"
+          (click)="closeDialog()"
+          aria-label="Close dialog"
+        ></button>
       </div>
       <form [formGroup]="sportForm" (ngSubmit)="saveSport()" novalidate>
-        <label>Name <input type="text" formControlName="name" maxlength="100" placeholder="e.g. Football" /></label>
-        @if (sportForm.controls.name.touched && sportForm.controls.name.invalid) { <p class="field-error">A sport name is required.</p> }
-        <label>Description <textarea formControlName="description" maxlength="500" placeholder="A short description (optional)"></textarea></label>
-        <label>Icon URL <input type="url" formControlName="iconUrl" placeholder="https://example.com/sport-icon.svg" /></label>
-        @if (sportForm.controls.iconUrl.touched && sportForm.controls.iconUrl.invalid) { <p class="field-error">Enter a valid http(s) URL.</p> }
-        @if (errorMessage(); as error) { <p class="catalogue__error" role="alert">{{ error }}</p> }
+        <label
+          >Name
+          <input type="text" formControlName="name" maxlength="100" placeholder="e.g. Football"
+        /></label>
+        @if (sportForm.controls.name.touched && sportForm.controls.name.hasError('required')) {
+          <p class="field-error">A sport name is required.</p>
+        }
+        @if (sportForm.controls.name.hasError('duplicate')) {
+          <p class="field-error" role="alert">A sport with this name already exists.</p>
+        }
+        <label
+          >Description
+          <textarea
+            formControlName="description"
+            maxlength="500"
+            placeholder="A short description (optional)"
+          ></textarea>
+        </label>
+        <label
+          >Icon URL
+          <input
+            type="url"
+            formControlName="iconUrl"
+            placeholder="https://example.com/sport-icon.svg"
+        /></label>
+        @if (sportForm.controls.iconUrl.touched && sportForm.controls.iconUrl.invalid) {
+          <p class="field-error">Enter a valid http(s) URL.</p>
+        }
+        @if (formErrorMessage(); as error) {
+          <p class="catalogue__error" role="alert">{{ error }}</p>
+        }
         <div class="modal__actions">
           <button class="button button--ghost" type="button" (click)="closeDialog()">Cancel</button>
-          <button class="button button--primary" type="submit" [disabled]="sportForm.invalid || isSaving()">{{ isSaving() ? 'Saving…' : 'Save' }}</button>
+          <button
+            class="button button--primary"
+            type="submit"
+            [disabled]="sportForm.invalid || isSaving()"
+          >
+            {{ isSaving() ? 'Saving…' : 'Save' }}
+          </button>
         </div>
       </form>
     </section>
@@ -117,17 +257,41 @@
 
 @if (deletingSport(); as sport) {
   <div class="modal-layer">
-    <button class="modal-backdrop" type="button" (click)="cancelDelete()" aria-label="Cancel deletion"></button>
-    <section class="modal modal--confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-sport-title">
+    <button
+      class="modal-backdrop"
+      type="button"
+      (click)="cancelDelete()"
+      aria-label="Cancel deletion"
+    ></button>
+    <section
+      class="modal modal--confirm"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-sport-title"
+    >
       <div class="modal__header">
         <h2 id="delete-sport-title">Remove {{ sport.name }}?</h2>
-        <button type="button" class="modal__close" (click)="cancelDelete()" aria-label="Close dialog"></button>
+        <button
+          type="button"
+          class="modal__close"
+          (click)="cancelDelete()"
+          aria-label="Close dialog"
+        ></button>
       </div>
       <p>This will soft delete the sport. It can no longer be used in the catalogue.</p>
-      @if (errorMessage(); as error) { <p class="catalogue__error" role="alert">{{ error }}</p> }
+      @if (deleteErrorMessage(); as error) {
+        <p class="catalogue__error" role="alert">{{ error }}</p>
+      }
       <div class="modal__actions">
         <button class="button button--ghost" type="button" (click)="cancelDelete()">Cancel</button>
-        <button class="button button--danger" type="button" [disabled]="isDeleting()" (click)="deleteSport()">{{ isDeleting() ? 'Removing…' : 'Remove Sport' }}</button>
+        <button
+          class="button button--danger"
+          type="button"
+          [disabled]="isDeleting()"
+          (click)="deleteSport()"
+        >
+          {{ isDeleting() ? 'Removing…' : 'Remove Sport' }}
+        </button>
       </div>
     </section>
   </div>

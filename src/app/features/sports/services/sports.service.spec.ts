@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { API_BASE_URL } from '../../../core/config/api-base-url.token';
-import { PaginatedResponse, Participant } from '../models/sport.model';
+import { PaginatedResponse, Participant, Sport } from '../models/sport.model';
 import { SportsService } from './sports.service';
 
 const API_URL = 'https://api.example.test';
@@ -22,9 +22,13 @@ describe('SportsService', () => {
     setup();
     let result: PaginatedResponse<unknown> | undefined;
 
-    service.searchGoverningBodies('sport-1', 3, 10, 'football').subscribe((response) => result = response);
+    service
+      .searchGoverningBodies('sport-1', 3, 10, 'football')
+      .subscribe((response) => (result = response));
 
-    const request = http.expectOne((candidate) => candidate.url === `${API_URL}/api/organizations/governing-bodies`);
+    const request = http.expectOne(
+      (candidate) => candidate.url === `${API_URL}/api/organizations/governing-bodies`,
+    );
     expect(request.request.params.get('sportId')).toBe('sport-1');
     expect(request.request.params.get('page')).toBe('3');
     expect(request.request.params.get('limit')).toBe('10');
@@ -35,10 +39,25 @@ describe('SportsService', () => {
     expect(result?.meta.page).toBe(1);
   });
 
+  it('returns the wrapped catalogue response with its data and pagination metadata', () => {
+    setup();
+    let result: PaginatedResponse<Sport> | undefined;
+
+    service.list(2, 10, 'football').subscribe((response) => (result = response));
+
+    const request = http.expectOne(
+      `${API_URL}/api/organizations/sports?page=2&limit=10&sortBy=name&sortOrder=asc&search=football`,
+    );
+    request.flush(page([sport('sport-1')], 11, 2, 10));
+
+    expect(result?.data).toEqual([sport('sport-1')]);
+    expect(result?.meta).toMatchObject({ page: 2, limit: 10, total: 11 });
+  });
+
   it('uses meta totals for all four catalogue cards', () => {
     setup();
     let stats: unknown[] = [];
-    service.getStats().subscribe((response) => stats = response);
+    service.getStats().subscribe((response) => (stats = response));
 
     const endpoints = [
       ['/api/organizations/sports', 11],
@@ -64,12 +83,20 @@ describe('SportsService', () => {
   it('loads every server page for a child collection', () => {
     setup();
     let participants: Participant[] = [];
-    service.listParticipants('team-1').subscribe((response) => participants = response);
+    service.listParticipants('team-1').subscribe((response) => (participants = response));
 
-    const first = http.expectOne((candidate) => candidate.url === `${API_URL}/api/organizations/players` && candidate.params.get('page') === '1');
+    const first = http.expectOne(
+      (candidate) =>
+        candidate.url === `${API_URL}/api/organizations/players` &&
+        candidate.params.get('page') === '1',
+    );
     first.flush(page([participant('one')], 101, 1, 100));
 
-    const second = http.expectOne((candidate) => candidate.url === `${API_URL}/api/organizations/players` && candidate.params.get('page') === '2');
+    const second = http.expectOne(
+      (candidate) =>
+        candidate.url === `${API_URL}/api/organizations/players` &&
+        candidate.params.get('page') === '2',
+    );
     second.flush(page([participant('two')], 101, 2, 100));
 
     expect(participants.map((item) => item.id)).toEqual(['one', 'two']);
@@ -78,7 +105,7 @@ describe('SportsService', () => {
   it('uses a null athlete profile when the backend reports no profile', () => {
     setup();
     let profile: unknown = 'unresolved';
-    service.getAthleteProfile('user-1').subscribe((response) => profile = response);
+    service.getAthleteProfile('user-1').subscribe((response) => (profile = response));
 
     const request = http.expectOne(`${API_URL}/api/athletes/user-1`);
     request.flush({ success: false }, { status: 404, statusText: 'Not Found' });
@@ -115,9 +142,35 @@ describe('SportsService', () => {
 });
 
 function page<T>(data: T[], total = 0, pageNumber = 1, limit = 1): PaginatedResponse<T> {
-  return { success: true, data, meta: { page: pageNumber, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } };
+  return {
+    success: true,
+    data,
+    meta: { page: pageNumber, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
+  };
 }
 
 function participant(id: string): Participant {
-  return { id, firstName: id, lastName: 'Player', jerseyNumber: null, position: null, teamId: 'team-1' };
+  return {
+    id,
+    firstName: id,
+    lastName: 'Player',
+    jerseyNumber: null,
+    position: null,
+    teamId: 'team-1',
+  };
+}
+
+function sport(id: string): Sport {
+  return {
+    id,
+    name: 'Football',
+    description: null,
+    iconUrl: null,
+    governingBodyCount: 0,
+    organizationCount: 0,
+    teamCount: 0,
+    participantCount: 0,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  };
 }

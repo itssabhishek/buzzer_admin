@@ -1,10 +1,17 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export interface HierarchyStat {
   label: string;
   value: number | string;
-  icon: 'sports' | 'governing-bodies' | 'organisations' | 'teams' | 'participants' | 'jersey' | 'position';
+  icon:
+    | 'sports'
+    | 'governing-bodies'
+    | 'organisations'
+    | 'teams'
+    | 'participants'
+    | 'jersey'
+    | 'position';
 }
 
 @Component({
@@ -19,6 +26,9 @@ export class HierarchyStatCardsComponent {
   readonly stats = input.required<HierarchyStat[]>();
   readonly isLoading = input(false);
   readonly columns = input<3 | 4>(3);
+  readonly loadingCards = computed(() =>
+    Array.from({ length: this.columns() }, (_, index) => index),
+  );
 
   isNumeric(value: number | string): boolean {
     return typeof value === 'number';
