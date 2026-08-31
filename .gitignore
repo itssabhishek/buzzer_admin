@@ -40,7 +40,10 @@ testem.log
 __screenshots__/
 figma_designs/
 DEVELOPER_GUIDE.md
-task.pdf
+task-*
+Angular.md
+github_collaboration.md
+
 
 # System files
 .DS_Store
