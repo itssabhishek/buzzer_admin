@@ -56,6 +56,7 @@ export class OrganisationDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private latestTeamRequest = 0;
 
   readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
   readonly sport = signal<Sport | null>(null);
@@ -88,6 +89,7 @@ export class OrganisationDetailComponent {
     this.route.paramMap
       .pipe(
         tap(() => {
+          this.latestTeamRequest++;
           this.isLoading.set(true);
           this.errorMessage.set(null);
         }),
@@ -100,7 +102,6 @@ export class OrganisationDetailComponent {
                     organisation: of(organisation),
                     governingBody: of(governingBody),
                     sport: this.sportsService.getSport(governingBody.sportId),
-                    teams: this.sportsService.searchTeams(organisation.id, 1, CHILD_PAGE_SIZE),
                   }),
                 ),
               ),
@@ -110,13 +111,11 @@ export class OrganisationDetailComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ organisation, governingBody, sport, teams }) => {
+        next: ({ organisation, governingBody, sport }) => {
           this.organisation.set(organisation);
           this.governingBody.set(governingBody);
           this.sport.set(sport);
-          this.teams.set(teams.data);
-          this.teamMeta.set(teams.meta);
-          this.isLoading.set(false);
+          this.loadTeams(1);
         },
         error: () => {
           this.isLoading.set(false);
@@ -345,20 +344,33 @@ export class OrganisationDetailComponent {
       return;
     }
 
+    const requestId = ++this.latestTeamRequest;
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.sportsService
       .searchTeams(organisation.id, page, CHILD_PAGE_SIZE, this.teamSearch())
       .pipe(
-        finalize(() => this.isLoading.set(false)),
+        finalize(() => {
+          if (requestId === this.latestTeamRequest) {
+            this.isLoading.set(false);
+          }
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response) => {
+          if (requestId !== this.latestTeamRequest) {
+            return;
+          }
+
           this.teams.set(response.data);
           this.teamMeta.set(response.meta);
         },
-        error: () => this.errorMessage.set('Unable to load teams. Please try again.'),
+        error: () => {
+          if (requestId === this.latestTeamRequest) {
+            this.errorMessage.set('Unable to load teams. Please try again.');
+          }
+        },
       });
   }
 
