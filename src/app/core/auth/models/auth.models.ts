@@ -15,6 +15,11 @@ export interface AuthSession {
   user: AuthUser;
 }
 
+export interface AuthTokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
