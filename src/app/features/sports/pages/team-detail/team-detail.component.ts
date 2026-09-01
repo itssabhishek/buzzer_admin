@@ -27,15 +27,17 @@ import {
 import { SportsService } from '../../services/sports.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 
+const CHILD_PAGE_SIZE = 10;
+const EMPTY_META: PaginationMeta = { page: 1, limit: CHILD_PAGE_SIZE, total: 0, totalPages: 1 };
+
 @Component({
-  selector: 'app-participant-detail',
+  selector: 'app-team-detail',
   standalone: true,
   imports: [HierarchyDetailComponent, HierarchyAddDialogComponent, ReactiveFormsModule],
-  templateUrl: './participant-detail.component.html',
+  templateUrl: './team-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ParticipantDetailComponent {
-  private readonly childPageSize = 10;
+export class TeamDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly sportsService = inject(SportsService);
   private readonly destroyRef = inject(DestroyRef);
@@ -43,20 +45,13 @@ export class ParticipantDetailComponent {
   private readonly authService = inject(AuthService);
 
   readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
-
   readonly sport = signal<Sport | null>(null);
   readonly governingBody = signal<GoverningBody | null>(null);
   readonly organisation = signal<Organisation | null>(null);
   readonly team = signal<Team | null>(null);
-  readonly participant = signal<Participant | null>(null);
-  readonly teammates = signal<Participant[]>([]);
-  readonly teammateMeta = signal<PaginationMeta>({
-    page: 1,
-    limit: this.childPageSize,
-    total: 0,
-    totalPages: 1,
-  });
-  readonly teammateSearch = signal('');
+  readonly participants = signal<Participant[]>([]);
+  readonly participantMeta = signal<PaginationMeta>(EMPTY_META);
+  readonly participantSearch = signal('');
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly addDialogOpen = signal(false);
@@ -77,28 +72,23 @@ export class ParticipantDetailComponent {
           this.errorMessage.set(null);
         }),
         switchMap((params) =>
-          this.sportsService.getParticipant(params.get('participantId') ?? '').pipe(
-            switchMap((participant) =>
-              this.sportsService.getTeam(participant.teamId).pipe(
-                switchMap((team) =>
-                  this.sportsService.getOrganisation(team.organizationId).pipe(
-                    switchMap((organisation) =>
-                      this.sportsService.getGoverningBody(organisation.governingBodyId).pipe(
-                        switchMap((governingBody) =>
-                          forkJoin({
-                            participant: of(participant),
-                            team: of(team),
-                            organisation: of(organisation),
-                            governingBody: of(governingBody),
-                            sport: this.sportsService.getSport(governingBody.sportId),
-                            participants: this.sportsService.searchParticipants(
-                              team.id,
-                              1,
-                              this.childPageSize,
-                            ),
-                          }),
+          this.sportsService.getTeam(params.get('teamId') ?? '').pipe(
+            switchMap((team) =>
+              this.sportsService.getOrganisation(team.organizationId).pipe(
+                switchMap((organisation) =>
+                  this.sportsService.getGoverningBody(organisation.governingBodyId).pipe(
+                    switchMap((governingBody) =>
+                      forkJoin({
+                        team: of(team),
+                        organisation: of(organisation),
+                        governingBody: of(governingBody),
+                        sport: this.sportsService.getSport(governingBody.sportId),
+                        participants: this.sportsService.searchParticipants(
+                          team.id,
+                          1,
+                          CHILD_PAGE_SIZE,
                         ),
-                      ),
+                      }),
                     ),
                   ),
                 ),
@@ -109,71 +99,55 @@ export class ParticipantDetailComponent {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ participant, team, organisation, governingBody, sport, participants }) => {
-          this.participant.set(participant);
+        next: ({ team, organisation, governingBody, sport, participants }) => {
           this.team.set(team);
           this.organisation.set(organisation);
           this.governingBody.set(governingBody);
           this.sport.set(sport);
-          this.teammates.set(participants.data.filter((member) => member.id !== participant.id));
-          this.teammateMeta.set(participants.meta);
+          this.participants.set(participants.data);
+          this.participantMeta.set(participants.meta);
           this.isLoading.set(false);
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Unable to load this participant. Please try again.');
+          this.errorMessage.set('Unable to load this team. Please try again.');
         },
       });
   }
 
-  title(): string {
-    const participant = this.participant();
-    return participant
-      ? `${participant.firstName} ${participant.lastName}`
-      : 'Loading participant…';
-  }
-
   breadcrumbs(): HierarchyBreadcrumb[] {
     const sport = this.sport();
-    const body = this.governingBody();
+    const governingBody = this.governingBody();
     const organisation = this.organisation();
-    const team = this.team();
+
     return [
       { label: 'Sport', route: '/sports' },
       ...(sport ? [{ label: sport.name, route: `/sports/${sport.id}` }] : []),
-      ...(sport && body
-        ? [{ label: body.name, route: `/sports/${sport.id}/governing-bodies/${body.id}` }]
+      ...(sport && governingBody
+        ? [
+            {
+              label: governingBody.name,
+              route: `/sports/${sport.id}/governing-bodies/${governingBody.id}`,
+            },
+          ]
         : []),
-      ...(sport && body && organisation
+      ...(sport && governingBody && organisation
         ? [
             {
               label: organisation.name,
-              route: `/sports/${sport.id}/governing-bodies/${body.id}/organisations/${organisation.id}`,
+              route: `/sports/${sport.id}/governing-bodies/${governingBody.id}/organisations/${organisation.id}`,
             },
           ]
         : []),
-      ...(sport && body && organisation && team
-        ? [
-            {
-              label: team.name,
-              route: `/sports/${sport.id}/governing-bodies/${body.id}/organisations/${organisation.id}/teams/${team.id}`,
-            },
-          ]
-        : []),
-      { label: this.title() },
+      { label: this.team()?.name ?? 'Team' },
     ];
   }
 
   stats(): HierarchyStat[] {
-    const participant = this.participant();
     return [
-      { label: 'Jersey number', value: participant?.jerseyNumber ?? '—', icon: 'jersey' },
-      { label: 'Position', value: participant?.position ?? '—', icon: 'position' },
-      {
-        label: 'Team members',
-        value: this.teammates().length + (participant ? 1 : 0),
-        icon: 'participants',
-      },
+      { label: 'Participants', value: this.participantMeta().total, icon: 'participants' },
+      { label: 'Short name', value: this.team()?.shortName ?? '—', icon: 'position' },
+      { label: 'Organisation', value: this.organisation()?.name ?? '—', icon: 'organisations' },
     ];
   }
 
@@ -182,32 +156,29 @@ export class ParticipantDetailComponent {
     const governingBodyId = this.governingBody()?.id;
     const organisationId = this.organisation()?.id;
     const teamId = this.team()?.id;
-    return this.teammates().map((member) => ({
-      id: member.id,
-      title: `${member.firstName} ${member.lastName}`,
-      subtitle: member.position,
+
+    return this.participants().map((participant) => ({
+      id: participant.id,
+      title: `${participant.firstName} ${participant.lastName}`,
+      subtitle: participant.position,
       values: {
-        jersey: member.jerseyNumber ? `#${member.jerseyNumber}` : null,
-        position: member.position,
+        jersey: participant.jerseyNumber ? `#${participant.jerseyNumber}` : null,
+        position: participant.position,
       },
       route:
         sportId && governingBodyId && organisationId && teamId
-          ? `/sports/${sportId}/governing-bodies/${governingBodyId}/organisations/${organisationId}/teams/${teamId}/participants/${member.id}`
+          ? `/sports/${sportId}/governing-bodies/${governingBodyId}/organisations/${organisationId}/teams/${teamId}/participants/${participant.id}`
           : undefined,
     }));
   }
 
-  updateTeammateSearch(search: string): void {
-    this.teammateSearch.set(search);
-    this.loadTeammates(1);
+  updateParticipantSearch(search: string): void {
+    this.participantSearch.set(search);
+    this.loadParticipants(1);
   }
 
-  changeTeammatePage(page: number): void {
-    this.loadTeammates(page);
-  }
-
-  teamMemberTotal(): number {
-    return Math.max(0, this.teammateMeta().total - 1);
+  changeParticipantPage(page: number): void {
+    this.loadParticipants(page);
   }
 
   openAddDialog(): void {
@@ -224,6 +195,7 @@ export class ParticipantDetailComponent {
 
   addParticipant(): void {
     const team = this.team();
+
     if (!team || this.participantForm.invalid || this.isAdding()) {
       this.participantForm.markAllAsTouched();
       return;
@@ -243,8 +215,8 @@ export class ParticipantDetailComponent {
       .pipe(finalize(() => this.isAdding.set(false)))
       .subscribe({
         next: () => {
-          this.loadTeammates(1);
           this.addDialogOpen.set(false);
+          this.loadParticipants(1);
         },
         error: (error: HttpErrorResponse) =>
           this.addErrorMessage.set(
@@ -260,27 +232,36 @@ export class ParticipantDetailComponent {
   readonly addFields: HierarchyAddDialogField[] = [
     { controlName: 'firstName', label: 'First name', placeholder: 'e.g. Alex' },
     { controlName: 'lastName', label: 'Last name', placeholder: 'e.g. Morgan' },
-    { controlName: 'jerseyNumber', label: 'Jersey number', type: 'number', placeholder: 'e.g. 10' },
+    {
+      controlName: 'jerseyNumber',
+      label: 'Jersey number',
+      type: 'number',
+      placeholder: 'e.g. 10',
+    },
     { controlName: 'position', label: 'Position', placeholder: 'e.g. Forward' },
   ];
 
-  private loadTeammates(page: number): void {
+  private loadParticipants(page: number): void {
     const team = this.team();
-    if (!team) return;
+
+    if (!team) {
+      return;
+    }
+
     this.isLoading.set(true);
+    this.errorMessage.set(null);
     this.sportsService
-      .searchParticipants(team.id, page, this.childPageSize, this.teammateSearch())
+      .searchParticipants(team.id, page, CHILD_PAGE_SIZE, this.participantSearch())
       .pipe(
         finalize(() => this.isLoading.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response) => {
-          const participantId = this.participant()?.id;
-          this.teammates.set(response.data.filter((member) => member.id !== participantId));
-          this.teammateMeta.set(response.meta);
+          this.participants.set(response.data);
+          this.participantMeta.set(response.meta);
         },
-        error: () => this.errorMessage.set('Unable to load team members. Please try again.'),
+        error: () => this.errorMessage.set('Unable to load participants. Please try again.'),
       });
   }
 }

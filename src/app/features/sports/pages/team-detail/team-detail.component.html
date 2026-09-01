@@ -1,0 +1,33 @@
+<app-hierarchy-detail
+  [breadcrumbs]="breadcrumbs()"
+  eyebrow="Team"
+  [title]="team()?.name ?? 'Loading team…'"
+  [description]="organisation() ? 'Part of ' + organisation()?.name : null"
+  [stats]="stats()"
+  childTableTitle="Participants"
+  [childTableTotal]="participantMeta().total"
+  [childTableColumns]="childColumns"
+  [childTableRows]="childRows()"
+  [hasChildSearch]="true"
+  [childSearch]="participantSearch()"
+  [childPagination]="participantMeta()"
+  [isLoading]="isLoading()"
+  [errorMessage]="errorMessage()"
+  emptyMessage="This team does not have any participants yet."
+  [addLabel]="canManageHierarchy() ? 'Participant' : undefined"
+  (addRequested)="openAddDialog()"
+  (childSearchChanged)="updateParticipantSearch($event)"
+  (childPageChanged)="changeParticipantPage($event)"
+/>
+
+<app-hierarchy-add-dialog
+  [isOpen]="addDialogOpen()"
+  title="Add Participant"
+  entityLabel="Participant"
+  [form]="participantForm"
+  [fields]="addFields"
+  [isSaving]="isAdding()"
+  [errorMessage]="addErrorMessage()"
+  (closed)="closeAddDialog()"
+  (submitted)="addParticipant()"
+/>

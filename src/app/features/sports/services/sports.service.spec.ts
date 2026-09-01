@@ -39,6 +39,46 @@ describe('SportsService', () => {
     expect(result?.meta.page).toBe(1);
   });
 
+  it('uses server-side parent filters for organisations, teams, and participants', () => {
+    setup();
+    service.searchOrganisations('governing-body-1', 2, 10, 'city').subscribe();
+    service.searchTeams('organisation-1', 3, 10, 'united').subscribe();
+    service.searchParticipants('team-1', 4, 10, 'alex').subscribe();
+
+    const requests = [
+      {
+        url: `${API_URL}/api/organizations/organizations`,
+        parentKey: 'governingBodyId',
+        parentId: 'governing-body-1',
+        page: '2',
+        search: 'city',
+      },
+      {
+        url: `${API_URL}/api/organizations/teams`,
+        parentKey: 'organizationId',
+        parentId: 'organisation-1',
+        page: '3',
+        search: 'united',
+      },
+      {
+        url: `${API_URL}/api/organizations/players`,
+        parentKey: 'teamId',
+        parentId: 'team-1',
+        page: '4',
+        search: 'alex',
+      },
+    ] as const;
+
+    for (const expected of requests) {
+      const request = http.expectOne((candidate) => candidate.url === expected.url);
+      expect(request.request.params.get(expected.parentKey)).toBe(expected.parentId);
+      expect(request.request.params.get('page')).toBe(expected.page);
+      expect(request.request.params.get('limit')).toBe('10');
+      expect(request.request.params.get('search')).toBe(expected.search);
+      request.flush(page([]));
+    }
+  });
+
   it('returns the wrapped catalogue response with its data and pagination metadata', () => {
     setup();
     let result: PaginatedResponse<Sport> | undefined;

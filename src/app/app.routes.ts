@@ -38,14 +38,24 @@ export const routes: Routes = [
         path: 'sports/import',
         data: { pageTitle: 'Bulk Import' },
         loadComponent: () =>
-          import('./features/sports/pages/bulk-import/bulk-import.component').then((c) => c.BulkImportComponent),
+          import('./features/sports/pages/bulk-import/bulk-import.component').then(
+            (c) => c.BulkImportComponent,
+          ),
       },
       {
-        path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/participants/:participantId',
+        path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/teams/:teamId/participants/:participantId',
         data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
           import('./features/sports/pages/participant-detail/participant-detail.component').then(
             (c) => c.ParticipantDetailComponent,
+          ),
+      },
+      {
+        path: 'sports/:sportId/governing-bodies/:governingBodyId/organisations/:organisationId/teams/:teamId',
+        data: { pageTitle: 'Sport Management' },
+        loadComponent: () =>
+          import('./features/sports/pages/team-detail/team-detail.component').then(
+            (c) => c.TeamDetailComponent,
           ),
       },
       {
@@ -68,7 +78,9 @@ export const routes: Routes = [
         path: 'sports/:sportId',
         data: { pageTitle: 'Sport Management' },
         loadComponent: () =>
-          import('./features/sports/pages/sport-detail/sport-detail.component').then((c) => c.SportDetailComponent),
+          import('./features/sports/pages/sport-detail/sport-detail.component').then(
+            (c) => c.SportDetailComponent,
+          ),
       },
       {
         path: 'match-management',

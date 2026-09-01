@@ -34,7 +34,11 @@ export class SportsService {
   private readonly sportsUrl = `${this.apiBaseUrl}/api/organizations/sports`;
 
   list(page: number, limit: number, search = ''): Observable<PaginatedResponse<Sport>> {
-    let params = new HttpParams().set('page', page).set('limit', limit).set('sortBy', 'name').set('sortOrder', 'asc');
+    let params = new HttpParams()
+      .set('page', page)
+      .set('limit', limit)
+      .set('sortBy', 'name')
+      .set('sortOrder', 'asc');
 
     if (search.trim()) {
       params = params.set('search', search.trim());
@@ -60,15 +64,21 @@ export class SportsService {
   }
 
   create(payload: SportPayload): Observable<Sport> {
-    return this.http.post<ApiResponse<Sport>>(this.sportsUrl, payload).pipe(map((response) => response.data));
+    return this.http
+      .post<ApiResponse<Sport>>(this.sportsUrl, payload)
+      .pipe(map((response) => response.data));
   }
 
   update(id: string, payload: SportPayload): Observable<Sport> {
-    return this.http.patch<ApiResponse<Sport>>(`${this.sportsUrl}/${id}`, payload).pipe(map((response) => response.data));
+    return this.http
+      .patch<ApiResponse<Sport>>(`${this.sportsUrl}/${id}`, payload)
+      .pipe(map((response) => response.data));
   }
 
   softDelete(id: string): Observable<void> {
-    return this.http.delete<ApiResponse<void>>(`${this.sportsUrl}/${id}`).pipe(map(() => undefined));
+    return this.http
+      .delete<ApiResponse<void>>(`${this.sportsUrl}/${id}`)
+      .pipe(map(() => undefined));
   }
 
   getSport(id: string): Observable<Sport> {
@@ -95,28 +105,89 @@ export class SportsService {
     return this.listChildren<GoverningBody>('governing-bodies', 'name', 'sportId', sportId);
   }
 
-  searchGoverningBodies(sportId: string, page: number, limit: number, search = ''): Observable<PaginatedResponse<GoverningBody>> {
-    return this.listChildrenPage<GoverningBody>('governing-bodies', 'name', 'sportId', sportId, page, limit, search);
+  searchGoverningBodies(
+    sportId: string,
+    page: number,
+    limit: number,
+    search = '',
+  ): Observable<PaginatedResponse<GoverningBody>> {
+    return this.listChildrenPage<GoverningBody>(
+      'governing-bodies',
+      'name',
+      'sportId',
+      sportId,
+      page,
+      limit,
+      search,
+    );
   }
 
   listOrganisations(governingBodyId: string): Observable<Organisation[]> {
-    return this.listChildren<Organisation>('organizations', 'name', 'governingBodyId', governingBodyId);
+    return this.listChildren<Organisation>(
+      'organizations',
+      'name',
+      'governingBodyId',
+      governingBodyId,
+    );
   }
 
-  searchOrganisations(governingBodyId: string, page: number, limit: number, search = ''): Observable<PaginatedResponse<Organisation>> {
-    return this.listChildrenPage<Organisation>('organizations', 'name', 'governingBodyId', governingBodyId, page, limit, search);
+  searchOrganisations(
+    governingBodyId: string,
+    page: number,
+    limit: number,
+    search = '',
+  ): Observable<PaginatedResponse<Organisation>> {
+    return this.listChildrenPage<Organisation>(
+      'organizations',
+      'name',
+      'governingBodyId',
+      governingBodyId,
+      page,
+      limit,
+      search,
+    );
   }
 
   listTeams(organizationId: string): Observable<Team[]> {
     return this.listChildren<Team>('teams', 'name', 'organizationId', organizationId);
   }
 
+  searchTeams(
+    organizationId: string,
+    page: number,
+    limit: number,
+    search = '',
+  ): Observable<PaginatedResponse<Team>> {
+    return this.listChildrenPage<Team>(
+      'teams',
+      'name',
+      'organizationId',
+      organizationId,
+      page,
+      limit,
+      search,
+    );
+  }
+
   listParticipants(teamId: string): Observable<Participant[]> {
     return this.listChildren<Participant>('players', 'lastName', 'teamId', teamId);
   }
 
-  searchParticipants(teamId: string, page: number, limit: number, search = ''): Observable<PaginatedResponse<Participant>> {
-    return this.listChildrenPage<Participant>('players', 'lastName', 'teamId', teamId, page, limit, search);
+  searchParticipants(
+    teamId: string,
+    page: number,
+    limit: number,
+    search = '',
+  ): Observable<PaginatedResponse<Participant>> {
+    return this.listChildrenPage<Participant>(
+      'players',
+      'lastName',
+      'teamId',
+      teamId,
+      page,
+      limit,
+      search,
+    );
   }
 
   createGoverningBody(payload: GoverningBodyPayload): Observable<GoverningBody> {
@@ -173,36 +244,53 @@ export class SportsService {
 
   createSquadMember(organizationId: string, payload: SquadMemberPayload): Observable<SquadMember> {
     return this.http
-      .post<ApiResponse<SquadMember>>(`${this.organizationBaseUrl}/${organizationId}/squad`, payload)
+      .post<ApiResponse<SquadMember>>(
+        `${this.organizationBaseUrl}/${organizationId}/squad`,
+        payload,
+      )
       .pipe(map((response) => response.data));
   }
 
   createStaffMember(organizationId: string, payload: StaffMemberPayload): Observable<StaffMember> {
     return this.http
-      .post<ApiResponse<StaffMember>>(`${this.organizationBaseUrl}/${organizationId}/staff`, payload)
+      .post<ApiResponse<StaffMember>>(
+        `${this.organizationBaseUrl}/${organizationId}/staff`,
+        payload,
+      )
       .pipe(map((response) => response.data));
   }
 
   updateSquadMember(id: string, payload: SquadMemberUpdatePayload): Observable<SquadMember> {
-    return this.http.patch<ApiResponse<SquadMember>>(`${this.apiBaseUrl}/api/squad/${id}`, payload).pipe(map((response) => response.data));
+    return this.http
+      .patch<ApiResponse<SquadMember>>(`${this.apiBaseUrl}/api/squad/${id}`, payload)
+      .pipe(map((response) => response.data));
   }
 
   deleteSquadMember(id: string): Observable<void> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiBaseUrl}/api/squad/${id}`).pipe(map(() => undefined));
+    return this.http
+      .delete<ApiResponse<void>>(`${this.apiBaseUrl}/api/squad/${id}`)
+      .pipe(map(() => undefined));
   }
 
   updateStaffMember(id: string, payload: StaffMemberUpdatePayload): Observable<StaffMember> {
-    return this.http.patch<ApiResponse<StaffMember>>(`${this.apiBaseUrl}/api/staff/${id}`, payload).pipe(map((response) => response.data));
+    return this.http
+      .patch<ApiResponse<StaffMember>>(`${this.apiBaseUrl}/api/staff/${id}`, payload)
+      .pipe(map((response) => response.data));
   }
 
   deleteStaffMember(id: string): Observable<void> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiBaseUrl}/api/staff/${id}`).pipe(map(() => undefined));
+    return this.http
+      .delete<ApiResponse<void>>(`${this.apiBaseUrl}/api/staff/${id}`)
+      .pipe(map(() => undefined));
   }
 
   getAthleteProfile(userId: string): Observable<AthleteProfile | null> {
     return this.http
       .get<ApiResponse<AthleteProfile>>(`${this.apiBaseUrl}/api/athletes/${userId}`)
-      .pipe(map((response) => response.data), catchError(() => of(null)));
+      .pipe(
+        map((response) => response.data),
+        catchError(() => of(null)),
+      );
   }
 
   private getTotal(path: string): Observable<number> {
@@ -219,11 +307,24 @@ export class SportsService {
       .pipe(map((response) => response.data));
   }
 
-  private listChildren<T>(resource: string, sortBy: string, parentKey: string, parentId: string): Observable<T[]> {
+  private listChildren<T>(
+    resource: string,
+    sortBy: string,
+    parentKey: string,
+    parentId: string,
+  ): Observable<T[]> {
     return this.listChildrenPage<T>(resource, sortBy, parentKey, parentId, 1, 100, '').pipe(
       expand((response) =>
         response.meta.page < response.meta.totalPages
-          ? this.listChildrenPage<T>(resource, sortBy, parentKey, parentId, response.meta.page + 1, 100, '')
+          ? this.listChildrenPage<T>(
+              resource,
+              sortBy,
+              parentKey,
+              parentId,
+              response.meta.page + 1,
+              100,
+              '',
+            )
           : EMPTY,
       ),
       map((response) => response.data),
@@ -231,7 +332,15 @@ export class SportsService {
     );
   }
 
-  private listChildrenPage<T>(resource: string, sortBy: string, parentKey: string, parentId: string, page: number, limit: number, search: string): Observable<PaginatedResponse<T>> {
+  private listChildrenPage<T>(
+    resource: string,
+    sortBy: string,
+    parentKey: string,
+    parentId: string,
+    page: number,
+    limit: number,
+    search: string,
+  ): Observable<PaginatedResponse<T>> {
     let params = new HttpParams()
       .set('page', page)
       .set('limit', limit)
@@ -239,7 +348,10 @@ export class SportsService {
       .set('sortOrder', 'asc')
       .set(parentKey, parentId);
     if (search.trim()) params = params.set('search', search.trim());
-    return this.http.get<PaginatedResponse<T>>(`${this.sportsUrl.replace('/sports', '')}/${resource}`, { params });
+    return this.http.get<PaginatedResponse<T>>(
+      `${this.sportsUrl.replace('/sports', '')}/${resource}`,
+      { params },
+    );
   }
 
   private createChild<T, TPayload>(resource: string, payload: TPayload): Observable<T> {
