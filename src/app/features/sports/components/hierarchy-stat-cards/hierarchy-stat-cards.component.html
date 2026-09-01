@@ -1,6 +1,8 @@
 <div class="stat-cards" [style.--stat-card-columns]="columns()" aria-label="Entity statistics">
   @if (isLoading()) {
-    @for (item of [1, 2, 3]; track item) { <article class="stat-card stat-card--loading" aria-label="Loading statistic"></article> }
+    @for (item of loadingCards(); track item) {
+      <article class="stat-card stat-card--loading" aria-label="Loading statistic"></article>
+    }
   } @else {
     @for (stat of stats(); track stat.label) {
       <article class="stat-card">

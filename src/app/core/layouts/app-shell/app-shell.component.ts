@@ -21,11 +21,13 @@ export class AppShellComponent {
   readonly pageTitle = signal('Dashboard');
 
   constructor() {
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      startWith(null),
-      takeUntilDestroyed(),
-    ).subscribe(() => this.updatePageTitle());
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        startWith(null),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.updatePageTitle());
   }
 
   toggleSidebar(): void {
@@ -45,6 +47,6 @@ export class AppShellComponent {
       route = route.firstChild;
     }
 
-    this.pageTitle.set(route.snapshot.data['pageTitle'] ?? 'Dashboard');
+    this.pageTitle.set(route.snapshot?.data?.['pageTitle'] ?? 'Dashboard');
   }
 }

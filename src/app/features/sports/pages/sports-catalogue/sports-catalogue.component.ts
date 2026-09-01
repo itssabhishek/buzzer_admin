@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,7 +17,10 @@ import { SportsService } from '../../services/sports.service';
 import { ButtonComponent } from '../../../../common/components/ui';
 import { AppSearchService } from '../../../../core/search/app-search.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
-import { HierarchyBreadcrumb, HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
+import {
+  HierarchyBreadcrumb,
+  HierarchyBreadcrumbsComponent,
+} from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
 import { HierarchyStatCardsComponent } from '../../components/hierarchy-stat-cards/hierarchy-stat-cards.component';
 
 const PAGE_SIZE = 10;
@@ -19,7 +29,13 @@ const EMPTY_META: PaginationMeta = { page: 1, limit: PAGE_SIZE, total: 0, totalP
 @Component({
   selector: 'app-sports-catalogue',
   standalone: true,
-  imports: [ButtonComponent, HierarchyBreadcrumbsComponent, HierarchyStatCardsComponent, ReactiveFormsModule, RouterLink],
+  imports: [
+    ButtonComponent,
+    HierarchyBreadcrumbsComponent,
+    HierarchyStatCardsComponent,
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   templateUrl: './sports-catalogue.component.html',
   styleUrl: './sports-catalogue.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,9 +57,13 @@ export class SportsCatalogueComponent {
   readonly meta = signal<PaginationMeta>(EMPTY_META);
   readonly search = signal(this.appSearch.searchTerm());
   readonly isLoading = signal(true);
+  readonly isStatsLoading = signal(true);
   readonly isSaving = signal(false);
   readonly isDeleting = signal(false);
-  readonly errorMessage = signal<string | null>(null);
+  readonly tableErrorMessage = signal<string | null>(null);
+  readonly statsErrorMessage = signal<string | null>(null);
+  readonly formErrorMessage = signal<string | null>(null);
+  readonly deleteErrorMessage = signal<string | null>(null);
   readonly dialogOpen = signal(false);
   readonly deletingSport = signal<Sport | null>(null);
   readonly editingSport = signal<Sport | null>(null);
@@ -62,6 +82,10 @@ export class SportsCatalogueComponent {
         this.loadSports(1);
       });
 
+    this.sportForm.controls.name.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.clearDuplicateNameError());
+
     this.loadSports();
     this.loadStats();
   }
@@ -79,7 +103,7 @@ export class SportsCatalogueComponent {
   openCreateDialog(): void {
     this.editingSport.set(null);
     this.sportForm.reset({ name: '', description: '', iconUrl: '' });
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.dialogOpen.set(true);
   }
 
@@ -90,7 +114,7 @@ export class SportsCatalogueComponent {
       description: sport.description ?? '',
       iconUrl: sport.iconUrl ?? '',
     });
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     this.dialogOpen.set(true);
   }
 
@@ -113,7 +137,7 @@ export class SportsCatalogueComponent {
       : this.sportsService.create(payload);
 
     this.isSaving.set(true);
-    this.errorMessage.set(null);
+    this.formErrorMessage.set(null);
     request.pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => {
         this.dialogOpen.set(false);
@@ -121,14 +145,21 @@ export class SportsCatalogueComponent {
         this.loadStats();
       },
       error: (error: HttpErrorResponse) => {
-        this.errorMessage.set(error.error?.error?.message ?? 'Unable to save this sport. Please try again.');
+        if (error.status === 409) {
+          this.setDuplicateNameError();
+          return;
+        }
+
+        this.formErrorMessage.set(
+          error.error?.error?.message ?? 'Unable to save this sport. Please try again.',
+        );
       },
     });
   }
 
   requestDelete(sport: Sport): void {
     this.deletingSport.set(sport);
-    this.errorMessage.set(null);
+    this.deleteErrorMessage.set(null);
   }
 
   cancelDelete(): void {
@@ -145,17 +176,22 @@ export class SportsCatalogueComponent {
     }
 
     this.isDeleting.set(true);
-    this.errorMessage.set(null);
-    this.sportsService.softDelete(sport.id).pipe(finalize(() => this.isDeleting.set(false))).subscribe({
-      next: () => {
-        this.deletingSport.set(null);
-        this.loadSports(this.meta().page);
-        this.loadStats();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage.set(error.error?.error?.message ?? 'Unable to remove this sport. Please try again.');
-      },
-    });
+    this.deleteErrorMessage.set(null);
+    this.sportsService
+      .softDelete(sport.id)
+      .pipe(finalize(() => this.isDeleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.deletingSport.set(null);
+          this.loadSports(this.meta().page);
+          this.loadStats();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.deleteErrorMessage.set(
+            error.error?.error?.message ?? 'Unable to remove this sport. Please try again.',
+          );
+        },
+      });
   }
 
   pageNumbers(): number[] {
@@ -165,8 +201,15 @@ export class SportsCatalogueComponent {
     return Array.from({ length: lastPage - firstPage + 1 }, (_, index) => firstPage + index);
   }
 
+  emptyStateMessage(): string {
+    return this.search().trim()
+      ? 'No sports match your search.'
+      : 'No sports have been added to the catalogue yet.';
+  }
+
   private loadSports(page = this.meta().page): void {
     this.isLoading.set(true);
+    this.tableErrorMessage.set(null);
     this.sportsService
       .list(page, PAGE_SIZE, this.search())
       .pipe(finalize(() => this.isLoading.set(false)))
@@ -183,16 +226,26 @@ export class SportsCatalogueComponent {
         error: () => {
           this.sports.set([]);
           this.meta.set(EMPTY_META);
-          this.errorMessage.set('Unable to load sports. Please refresh and try again.');
+          this.tableErrorMessage.set('Unable to load sports. Please refresh and try again.');
         },
       });
   }
 
   private loadStats(): void {
-    this.sportsService.getStats().subscribe({
-      next: (stats) => this.stats.set(stats),
-      error: () => this.stats.set([]),
-    });
+    this.isStatsLoading.set(true);
+    this.statsErrorMessage.set(null);
+    this.sportsService
+      .getStats()
+      .pipe(finalize(() => this.isStatsLoading.set(false)))
+      .subscribe({
+        next: (stats) => this.stats.set(stats),
+        error: () => {
+          this.stats.set([]);
+          this.statsErrorMessage.set(
+            'Unable to load catalogue statistics. Please refresh and try again.',
+          );
+        },
+      });
   }
 
   private toPayload(): SportPayload {
@@ -202,5 +255,23 @@ export class SportsCatalogueComponent {
       ...(description.trim() ? { description: description.trim() } : {}),
       ...(iconUrl.trim() ? { iconUrl: iconUrl.trim() } : {}),
     };
+  }
+
+  private setDuplicateNameError(): void {
+    const nameControl = this.sportForm.controls.name;
+    nameControl.setErrors({ ...nameControl.errors, duplicate: true });
+    nameControl.markAsTouched();
+  }
+
+  private clearDuplicateNameError(): void {
+    const nameControl = this.sportForm.controls.name;
+
+    if (!nameControl.hasError('duplicate')) {
+      return;
+    }
+
+    const remainingErrors = { ...nameControl.errors };
+    delete remainingErrors['duplicate'];
+    nameControl.setErrors(Object.keys(remainingErrors).length ? remainingErrors : null);
   }
 }
