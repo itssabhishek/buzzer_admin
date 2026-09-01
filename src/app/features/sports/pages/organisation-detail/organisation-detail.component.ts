@@ -3,7 +3,19 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  debounce,
+  distinctUntilChanged,
+  EMPTY,
+  finalize,
+  forkJoin,
+  of,
+  Subject,
+  switchMap,
+  tap,
+  timer,
+} from 'rxjs';
 
 import {
   HierarchyAddDialogComponent,
@@ -35,6 +47,13 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
 const CHILD_PAGE_SIZE = 10;
 const EMPTY_META: PaginationMeta = { page: 1, limit: CHILD_PAGE_SIZE, total: 0, totalPages: 1 };
 
+interface TeamQuery {
+  organizationId: string;
+  page: number;
+  search: string;
+  debounce: boolean;
+}
+
 @Component({
   selector: 'app-organisation-detail',
   standalone: true,
@@ -56,7 +75,7 @@ export class OrganisationDetailComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private latestTeamRequest = 0;
+  private readonly teamQueries = new Subject<TeamQuery>();
 
   readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
   readonly sport = signal<Sport | null>(null);
@@ -86,10 +105,40 @@ export class OrganisationDetailComponent {
   });
 
   constructor() {
+    this.teamQueries
+      .pipe(
+        debounce((query) => (query.debounce ? timer(300) : of(0))),
+        distinctUntilChanged(
+          (previous, current) =>
+            previous.organizationId === current.organizationId &&
+            previous.page === current.page &&
+            previous.search === current.search,
+        ),
+        switchMap((query) => {
+          this.isLoading.set(true);
+          this.errorMessage.set(null);
+
+          return this.sportsService
+            .searchTeams(query.organizationId, query.page, CHILD_PAGE_SIZE, query.search)
+            .pipe(
+              catchError(() => {
+                this.errorMessage.set('Unable to load teams. Please try again.');
+                return EMPTY;
+              }),
+              finalize(() => this.isLoading.set(false)),
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((response) => {
+        this.teams.set(response.data);
+        this.teamMeta.set(response.meta);
+      });
+
     this.route.paramMap
       .pipe(
         tap(() => {
-          this.latestTeamRequest++;
+          this.teamSearch.set('');
           this.isLoading.set(true);
           this.errorMessage.set(null);
         }),
@@ -186,7 +235,7 @@ export class OrganisationDetailComponent {
 
   updateTeamSearch(search: string): void {
     this.teamSearch.set(search);
-    this.loadTeams(1);
+    this.loadTeams(1, true);
   }
 
   changeTeamPage(page: number): void {
@@ -337,41 +386,19 @@ export class OrganisationDetailComponent {
     { controlName: 'city', label: 'City', placeholder: 'e.g. London' },
   ];
 
-  private loadTeams(page: number): void {
+  private loadTeams(page: number, debounceSearch = false): void {
     const organisation = this.organisation();
 
     if (!organisation) {
       return;
     }
 
-    const requestId = ++this.latestTeamRequest;
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    this.sportsService
-      .searchTeams(organisation.id, page, CHILD_PAGE_SIZE, this.teamSearch())
-      .pipe(
-        finalize(() => {
-          if (requestId === this.latestTeamRequest) {
-            this.isLoading.set(false);
-          }
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (response) => {
-          if (requestId !== this.latestTeamRequest) {
-            return;
-          }
-
-          this.teams.set(response.data);
-          this.teamMeta.set(response.meta);
-        },
-        error: () => {
-          if (requestId === this.latestTeamRequest) {
-            this.errorMessage.set('Unable to load teams. Please try again.');
-          }
-        },
-      });
+    this.teamQueries.next({
+      organizationId: organisation.id,
+      page,
+      search: this.teamSearch(),
+      debounce: debounceSearch,
+    });
   }
 
   private formatDate(date: string | null | undefined): string {
