@@ -5,7 +5,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   catchError,
-  debounce,
   distinctUntilChanged,
   EMPTY,
   finalize,
@@ -14,7 +13,6 @@ import {
   Subject,
   switchMap,
   tap,
-  timer,
 } from 'rxjs';
 
 import {
@@ -51,7 +49,6 @@ interface TeamQuery {
   organizationId: string;
   page: number;
   search: string;
-  debounce: boolean;
 }
 
 @Component({
@@ -107,7 +104,6 @@ export class OrganisationDetailComponent {
   constructor() {
     this.teamQueries
       .pipe(
-        debounce((query) => (query.debounce ? timer(300) : of(0))),
         distinctUntilChanged(
           (previous, current) =>
             previous.organizationId === current.organizationId &&
@@ -235,7 +231,7 @@ export class OrganisationDetailComponent {
 
   updateTeamSearch(search: string): void {
     this.teamSearch.set(search);
-    this.loadTeams(1, true);
+    this.loadTeams(1);
   }
 
   changeTeamPage(page: number): void {
@@ -386,7 +382,7 @@ export class OrganisationDetailComponent {
     { controlName: 'city', label: 'City', placeholder: 'e.g. London' },
   ];
 
-  private loadTeams(page: number, debounceSearch = false): void {
+  private loadTeams(page: number): void {
     const organisation = this.organisation();
 
     if (!organisation) {
@@ -397,7 +393,6 @@ export class OrganisationDetailComponent {
       organizationId: organisation.id,
       page,
       search: this.teamSearch(),
-      debounce: debounceSearch,
     });
   }
 
