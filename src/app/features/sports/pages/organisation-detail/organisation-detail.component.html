@@ -20,6 +20,8 @@
   emptyMessage="This organisation does not have any teams yet."
   [addLabel]="canManageHierarchy() ? 'Team' : undefined"
   (addRequested)="openAddTeamDialog()"
+  (childSearchChanged)="updateTeamSearch($event)"
+  (childPageChanged)="changeTeamPage($event)"
   (recordEditRequested)="openOrganisationEdit()"
   (recordDeleteRequested)="requestOrganisationDelete()"
 />
