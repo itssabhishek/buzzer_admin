@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -49,8 +42,7 @@ export class SportsCatalogueComponent {
   private readonly authService = inject(AuthService);
 
   readonly canManageSports = this.authService.canManageSports;
-  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
-  readonly canImport = computed(() => this.canManageSports() || this.canManageHierarchy());
+  readonly canImport = this.authService.canManageSports;
 
   readonly sports = signal<Sport[]>([]);
   readonly stats = signal<CatalogueStat[]>([]);

@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { API_BASE_URL } from '../../../core/config/api-base-url.token';
-import { PaginatedResponse, Participant, Sport } from '../models/sport.model';
+import { PaginatedResponse, Participant, Sport, StaffResponse } from '../models/sport.model';
 import { SportsService } from './sports.service';
 
 const API_URL = 'https://api.example.test';
@@ -151,6 +151,30 @@ describe('SportsService', () => {
     request.flush({ success: false }, { status: 404, statusText: 'Not Found' });
 
     expect(profile).toBeNull();
+  });
+
+  it('unwraps the grouped staff response without changing its order', () => {
+    setup();
+    let result: StaffResponse | undefined;
+
+    service.getStaff('organisation-1').subscribe((response) => (result = response));
+
+    const request = http.expectOne(`${API_URL}/api/organizations/organisation-1/staff`);
+    request.flush({
+      success: true,
+      data: {
+        data: [],
+        groups: [
+          { category: 'operations_administration', members: [] },
+          { category: 'club_president', members: [] },
+        ],
+      },
+    });
+
+    expect(result?.groups.map((group) => group.category)).toEqual([
+      'operations_administration',
+      'club_president',
+    ]);
   });
 
   it('uses the specified squad and staff mutation endpoints', () => {
