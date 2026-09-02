@@ -8,20 +8,44 @@
       }
       <div>
         <h2>{{ title() }}</h2>
-        @if (description()) { <p class="detail__description">{{ description() }}</p> }
+        @if (description()) {
+          <p class="detail__description">{{ description() }}</p>
+        }
       </div>
     </div>
 
     @if (allowRecordEdit() || allowRecordDelete()) {
       <div class="detail__record-actions">
         @if (allowRecordEdit()) {
-          <app-button variant="ghost" size="icon" [ariaLabel]="'Edit ' + title()" (clicked)="recordEditRequested.emit()">
-            <img src="assets/svg/Icons=ic_edit.svg" width="16" height="16" alt="" aria-hidden="true" />
+          <app-button
+            variant="ghost"
+            size="icon"
+            [ariaLabel]="'Edit ' + title()"
+            (clicked)="recordEditRequested.emit()"
+          >
+            <img
+              src="assets/svg/Icons=ic_edit.svg"
+              width="16"
+              height="16"
+              alt=""
+              aria-hidden="true"
+            />
           </app-button>
         }
         @if (allowRecordDelete()) {
-          <app-button variant="ghost" size="icon" [ariaLabel]="'Delete ' + title()" (clicked)="recordDeleteRequested.emit()">
-            <img src="assets/svg/Icons=ic_delete.svg" width="16" height="16" alt="" aria-hidden="true" />
+          <app-button
+            variant="ghost"
+            size="icon"
+            [ariaLabel]="'Delete ' + title()"
+            (clicked)="recordDeleteRequested.emit()"
+          >
+            <img
+              src="assets/svg/Icons=ic_delete.svg"
+              width="16"
+              height="16"
+              alt=""
+              aria-hidden="true"
+            />
           </app-button>
         }
       </div>
@@ -30,7 +54,10 @@
     @if (metadata().length) {
       <dl class="detail__metadata">
         @for (item of metadata(); track item.label) {
-          <div><dt>{{ item.label }}:</dt><dd>{{ item.value }}</dd></div>
+          <div>
+            <dt>{{ item.label }}:</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
         }
       </dl>
     }
@@ -43,16 +70,28 @@
     <div class="detail__table-heading">
       <h3>{{ childTableTitle() }}</h3>
       @if (addLabel() || secondaryAddLabel()) {
-      <div class="detail__add-actions">
+        <div class="detail__add-actions">
           @if (addLabel()) {
             <app-button variant="outline" size="small" (clicked)="addRequested.emit()">
-              <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+              <img
+                src="assets/svg/Icons=ic_add.svg"
+                width="16"
+                height="16"
+                alt=""
+                aria-hidden="true"
+              />
               Add {{ addLabel() }}
             </app-button>
           }
           @if (secondaryAddLabel()) {
             <app-button variant="outline" size="small" (clicked)="secondaryAddRequested.emit()">
-              <img src="assets/svg/Icons=ic_add.svg" width="16" height="16" alt="" aria-hidden="true" />
+              <img
+                src="assets/svg/Icons=ic_add.svg"
+                width="16"
+                height="16"
+                alt=""
+                aria-hidden="true"
+              />
               Add {{ secondaryAddLabel() }}
             </app-button>
           }
@@ -60,10 +99,19 @@
       }
     </div>
     @if (hasChildSearch()) {
-    <div class="detail__table-controls">
-      <label class="visually-hidden" [for]="childTableTitle() + '-search'">Search {{ childTableTitle() }}</label>
-      <input class="ui-input" [id]="childTableTitle() + '-search'" type="search" [value]="childSearch()" [placeholder]="'Search ' + childTableTitle()" (input)="childSearchChanged.emit($any($event.target).value)" />
-    </div>
+      <div class="detail__table-controls">
+        <label class="visually-hidden" [for]="childTableTitle() + '-search'"
+          >Search {{ childTableTitle() }}</label
+        >
+        <input
+          class="ui-input"
+          [id]="childTableTitle() + '-search'"
+          type="search"
+          [value]="childSearch()"
+          [placeholder]="'Search ' + childTableTitle()"
+          (input)="updateChildSearch($any($event.target).value)"
+        />
+      </div>
     }
     <app-hierarchy-child-table
       [title]="childTableTitle()"
@@ -81,9 +129,21 @@
     @if (childPagination(); as pagination) {
       @if (pagination.totalPages > 1) {
         <nav class="detail__pagination" [attr.aria-label]="childTableTitle() + ' pagination'">
-          <button type="button" [disabled]="pagination.page === 1" (click)="childPageChanged.emit(pagination.page - 1)">Previous</button>
+          <button
+            type="button"
+            [disabled]="pagination.page === 1"
+            (click)="childPageChanged.emit(pagination.page - 1)"
+          >
+            Previous
+          </button>
           <span>Page {{ pagination.page }} of {{ pagination.totalPages }}</span>
-          <button type="button" [disabled]="pagination.page === pagination.totalPages" (click)="childPageChanged.emit(pagination.page + 1)">Next</button>
+          <button
+            type="button"
+            [disabled]="pagination.page === pagination.totalPages"
+            (click)="childPageChanged.emit(pagination.page + 1)"
+          >
+            Next
+          </button>
         </nav>
       }
     }

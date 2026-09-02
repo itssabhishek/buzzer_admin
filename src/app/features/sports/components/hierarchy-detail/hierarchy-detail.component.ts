@@ -1,8 +1,27 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
-import { HierarchyBreadcrumb, HierarchyBreadcrumbsComponent } from '../hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
-import { HierarchyChildTableComponent, HierarchyChildTableColumn, HierarchyChildTableRow } from '../hierarchy-child-table/hierarchy-child-table.component';
-import { HierarchyStat, HierarchyStatCardsComponent } from '../hierarchy-stat-cards/hierarchy-stat-cards.component';
+import {
+  HierarchyBreadcrumb,
+  HierarchyBreadcrumbsComponent,
+} from '../hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
+import {
+  HierarchyChildTableComponent,
+  HierarchyChildTableColumn,
+  HierarchyChildTableRow,
+} from '../hierarchy-child-table/hierarchy-child-table.component';
+import {
+  HierarchyStat,
+  HierarchyStatCardsComponent,
+} from '../hierarchy-stat-cards/hierarchy-stat-cards.component';
 import { PaginationMeta } from '../../models/sport.model';
 import { ButtonComponent } from '../../../../common/components/ui';
 
@@ -14,12 +33,20 @@ export interface HierarchyDetailMetadata {
 @Component({
   selector: 'app-hierarchy-detail',
   standalone: true,
-  imports: [ButtonComponent, HierarchyBreadcrumbsComponent, HierarchyStatCardsComponent, HierarchyChildTableComponent],
+  imports: [
+    ButtonComponent,
+    HierarchyBreadcrumbsComponent,
+    HierarchyStatCardsComponent,
+    HierarchyChildTableComponent,
+  ],
   templateUrl: './hierarchy-detail.component.html',
   styleUrl: './hierarchy-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HierarchyDetailComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly childSearchInputs = new Subject<string>();
+
   readonly breadcrumbs = input.required<HierarchyBreadcrumb[]>();
   readonly eyebrow = input.required<string>();
   readonly title = input.required<string>();
@@ -53,4 +80,14 @@ export class HierarchyDetailComponent {
   readonly childDeleteRequested = output<HierarchyChildTableRow>();
   readonly childSearchChanged = output<string>();
   readonly childPageChanged = output<number>();
+
+  constructor() {
+    this.childSearchInputs
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((search) => this.childSearchChanged.emit(search));
+  }
+
+  updateChildSearch(search: string): void {
+    this.childSearchInputs.next(search);
+  }
 }
