@@ -3,16 +3,46 @@ import { RouterLink } from '@angular/router';
 
 import { ButtonComponent, FieldComponent } from '../../../../common/components/ui';
 import { HierarchyBreadcrumbsComponent } from '../../components/hierarchy-breadcrumbs/hierarchy-breadcrumbs.component';
-import { BulkImportEntityOption, BulkImportReport, BulkImportRow, ImportEntityType } from '../../models/bulk-import.model';
+import {
+  BulkImportEntityOption,
+  BulkImportReport,
+  BulkImportRow,
+  ImportEntityType,
+} from '../../models/bulk-import.model';
 import { BulkImportService } from '../../services/bulk-import.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 
 const ENTITY_OPTIONS: BulkImportEntityOption[] = [
-  { value: 'sports', label: 'Sports', requiredFields: ['name'], optionalFields: ['description', 'iconUrl'] },
-  { value: 'governing-bodies', label: 'Governing Bodies', requiredFields: ['name', 'sportId'], optionalFields: ['country'] },
-  { value: 'organisations', label: 'Organisations', requiredFields: ['name', 'governingBodyId'], optionalFields: ['city'] },
-  { value: 'teams', label: 'Teams', requiredFields: ['name', 'organizationId'], optionalFields: ['shortName'] },
-  { value: 'participants', label: 'Participants', requiredFields: ['firstName', 'lastName', 'teamId'], optionalFields: ['jerseyNumber', 'position'] },
+  {
+    value: 'sports',
+    label: 'Sports',
+    requiredFields: ['name'],
+    optionalFields: ['description', 'iconUrl'],
+  },
+  {
+    value: 'governing-bodies',
+    label: 'Governing Bodies',
+    requiredFields: ['name', 'sportId'],
+    optionalFields: ['country'],
+  },
+  {
+    value: 'organisations',
+    label: 'Organisations',
+    requiredFields: ['name', 'governingBodyId'],
+    optionalFields: ['city'],
+  },
+  {
+    value: 'teams',
+    label: 'Teams',
+    requiredFields: ['name', 'organizationId'],
+    optionalFields: ['shortName'],
+  },
+  {
+    value: 'participants',
+    label: 'Participants',
+    requiredFields: ['firstName', 'lastName', 'teamId'],
+    optionalFields: ['jerseyNumber', 'position'],
+  },
 ];
 
 @Component({
@@ -27,29 +57,28 @@ export class BulkImportComponent {
   private readonly bulkImportService = inject(BulkImportService);
   private readonly authService = inject(AuthService);
 
-  readonly entityOptions = ENTITY_OPTIONS;
-  readonly canManageSports = this.authService.canManageSports;
-  readonly canManageHierarchy = this.authService.canManageOrganisationHierarchy;
-  readonly canImport = computed(() => this.canManageSports() || this.canManageHierarchy());
+  readonly canImport = this.authService.canManageSports;
   readonly selectedEntityType = signal<ImportEntityType>('sports');
   readonly selectedFileName = signal<string | null>(null);
   readonly rows = signal<BulkImportRow[]>([]);
   readonly reports = signal<BulkImportReport[]>([]);
   readonly isImporting = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly availableEntityOptions = computed(() =>
-    ENTITY_OPTIONS.filter((option) => option.value === 'sports' ? this.canManageSports() : this.canManageHierarchy()),
+  readonly availableEntityOptions = computed(() => ENTITY_OPTIONS);
+  readonly selectedEntity = computed(
+    () =>
+      this.availableEntityOptions().find((option) => option.value === this.selectedEntityType()) ??
+      ENTITY_OPTIONS[0],
   );
-  readonly selectedEntity = computed(() => this.availableEntityOptions().find((option) => option.value === this.selectedEntityType()) ?? this.availableEntityOptions()[0]);
-  readonly addedCount = computed(() => this.reports().filter((report) => report.status === 'added').length);
-  readonly skippedCount = computed(() => this.reports().filter((report) => report.status === 'skipped').length);
-  readonly failedCount = computed(() => this.reports().filter((report) => report.status === 'failed').length);
-
-  constructor() {
-    if (!this.canManageSports() && this.canManageHierarchy()) {
-      this.selectedEntityType.set('governing-bodies');
-    }
-  }
+  readonly addedCount = computed(
+    () => this.reports().filter((report) => report.status === 'added').length,
+  );
+  readonly skippedCount = computed(
+    () => this.reports().filter((report) => report.status === 'skipped').length,
+  );
+  readonly failedCount = computed(
+    () => this.reports().filter((report) => report.status === 'failed').length,
+  );
 
   selectEntityType(value: string): void {
     this.selectedEntityType.set(value as ImportEntityType);
@@ -65,7 +94,11 @@ export class BulkImportComponent {
 
     try {
       const contents = await file.text();
-      const rows = file.name.toLowerCase().endsWith('.json') ? this.parseJson(contents) : file.name.toLowerCase().endsWith('.csv') ? this.parseCsv(contents) : null;
+      const rows = file.name.toLowerCase().endsWith('.json')
+        ? this.parseJson(contents)
+        : file.name.toLowerCase().endsWith('.csv')
+          ? this.parseCsv(contents)
+          : null;
       if (!rows) {
         throw new Error('Choose a .csv or .json file.');
       }
@@ -89,9 +122,13 @@ export class BulkImportComponent {
     this.reports.set([]);
     this.errorMessage.set(null);
     try {
-      await this.bulkImportService.importRowsSequentially(this.selectedEntityType(), this.rows(), (report) => {
-        this.reports.update((reports) => [...reports, report]);
-      });
+      await this.bulkImportService.importRowsSequentially(
+        this.selectedEntityType(),
+        this.rows(),
+        (report) => {
+          this.reports.update((reports) => [...reports, report]);
+        },
+      );
     } finally {
       this.isImporting.set(false);
     }
@@ -106,15 +143,24 @@ export class BulkImportComponent {
 
   private parseJson(contents: string): BulkImportRow[] {
     const parsed: unknown = JSON.parse(contents);
-    if (!Array.isArray(parsed) || parsed.some((row) => !row || typeof row !== 'object' || Array.isArray(row))) {
+    if (
+      !Array.isArray(parsed) ||
+      parsed.some((row) => !row || typeof row !== 'object' || Array.isArray(row))
+    ) {
       throw new Error('JSON imports must contain an array of objects.');
     }
 
-    return parsed.map((row, index) => ({ rowNumber: index + 1, values: row as Record<string, unknown> }));
+    return parsed.map((row, index) => ({
+      rowNumber: index + 1,
+      values: row as Record<string, unknown>,
+    }));
   }
 
   private parseCsv(contents: string): BulkImportRow[] {
-    const lines = contents.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim());
+    const lines = contents
+      .replace(/^\uFEFF/, '')
+      .split(/\r?\n/)
+      .filter((line) => line.trim());
     if (lines.length < 2) {
       return [];
     }
@@ -128,7 +174,9 @@ export class BulkImportComponent {
       const values = this.csvCells(line);
       return {
         rowNumber: index + 2,
-        values: Object.fromEntries(headers.map((header, columnIndex) => [header, values[columnIndex] ?? ''])),
+        values: Object.fromEntries(
+          headers.map((header, columnIndex) => [header, values[columnIndex] ?? '']),
+        ),
       };
     });
   }
